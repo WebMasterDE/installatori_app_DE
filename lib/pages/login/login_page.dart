@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         backgroundColor: Colors.orangeAccent,
       ),
-      body: Center(
+      body: SingleChildScrollView(
           child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Card(
