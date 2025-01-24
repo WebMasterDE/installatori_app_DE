@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:installatori_de/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   static const route = '/';
@@ -11,6 +12,16 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
+  bool _wrongCred = false;
+  
+  final email = TextEditingController();
+  final password = TextEditingController();
+
+  Future<bool> login() {
+    final AuthProvider authProvider = AuthProvider();
+
+    return authProvider.login(email.text, password.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,40 +65,59 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                 )),
                 SizedBox(height: 30),
-                Flexible(
-                    child: TextField(
-                  obscureText: false,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'email',
-                    labelStyle: Theme.of(context).textTheme.labelSmall,
+                if(_wrongCred)
+                  Flexible(
+                    child: Text(
+                      "Credenziali errate",
+                      style: Theme.of(context).textTheme.displaySmall,
+
+                    )
                   ),
-                  style: Theme.of(context).textTheme.labelSmall,
-                )),
+                SizedBox(height: 10),
+                Flexible(
+                  child: TextField(
+                    controller: email,
+                    obscureText: false,
+                    decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                      labelText: 'email',
+                      labelStyle: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  )
+                ),
                 SizedBox(height: 10),
                 Flexible(
                     child: TextField(
-                  obscureText: _obscureText,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Password',
-                      labelStyle: Theme.of(context).textTheme.labelSmall,
-                      suffixIcon: IconButton(
+                      controller: password,
+                      obscureText: _obscureText,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Password',
+                        labelStyle: Theme.of(context).textTheme.labelSmall,
+                        suffixIcon: IconButton(
                           onPressed: () {
                             setState((){_obscureText = !_obscureText;});
                           },
                           icon: Icon(_obscureText
                               ? Icons.visibility
-                              : Icons.visibility_off))),
+                              : Icons.visibility_off)
+                        )
+                      ),
                   style: Theme.of(context).textTheme.labelSmall,
                 )),
                 SizedBox(height: 10),
                 Center(
                   child: TextButton(
-                      onPressed: () {
-                        print("entrato");
-                        Navigator.pushNamedAndRemoveUntil(
+                      onPressed: () async {
+                        if(await login()) {
+                          Navigator.pushNamedAndRemoveUntil(
                             context, '/condomini', (route) => false);
+                        }else{
+                          setState(() {
+                            _wrongCred = true;
+                          });
+                        }
                       },
                       style: TextButton.styleFrom(
                           backgroundColor: Colors.orangeAccent),
