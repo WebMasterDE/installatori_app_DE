@@ -1,0 +1,69 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
+class ApiRequests {
+
+  static const String BASE_URL = 'http://192.168.2.211:3000/api/';
+
+  static Future<dynamic> sendRequest(String url, String method, Map<String, dynamic> body, {Map<String, String>? headers}) async {
+    try {
+
+      dynamic response;
+      if(method == 'GET') {
+        response = await http.get(Uri.parse(BASE_URL + url), headers: headers);
+      }else if(method == 'POST') {
+        response = await http.post(Uri.parse(BASE_URL + url), body: body, headers: headers);
+      }else if(method == 'PUT') {
+        response = await http.put(Uri.parse(BASE_URL + url), body: body, headers: headers);
+      }
+
+      var responseBody = json.decode(response.body);
+
+      return responseBody;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<dynamic> sendAuthRequest(String url, String method, Map<String, dynamic> body) async {
+    try {
+      
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String token = prefs.getString('token') ?? '';
+
+      if(token.isEmpty) {
+        return null;
+      }
+
+      final Map<String, String> headers = {'Authorization': 'Bearer $token'};
+
+      final response = await sendRequest(url, method, body, headers: headers);
+
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+
+  static Future<dynamic> sendLoginRequest(String url, String mail, String psw) async {
+    try {
+      String basicAuth = base64Encode(utf8.encode('$mail:$psw'));
+      final String basicAuthString = 'Basic $basicAuth';
+
+      final  Map<String, String> headers = {'Authorization': basicAuthString, 'Content-Type': 'application/json'};
+
+      final response = await sendRequest(url, 'GET', {}, headers: headers);
+
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+
+
+}

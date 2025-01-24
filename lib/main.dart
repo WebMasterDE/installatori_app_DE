@@ -3,11 +3,11 @@ import 'package:installatori_de/config/routes.dart';
 import 'package:installatori_de/theme/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const AppInstallatori());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AppInstallatori extends StatelessWidget {
+  const AppInstallatori({super.key});
 
   // This widget is the root of your application.
   @override

@@ -21,8 +21,12 @@ class CustomTheme {
           color: Colors.black,
           fontSize: 15,
           fontWeight: FontWeight.bold
-
-        )
+        ),
+        displaySmall: TextStyle(
+          color: Colors.red,
+          fontSize: 15,
+          fontWeight: FontWeight.bold
+        ),
       )
     );
 
