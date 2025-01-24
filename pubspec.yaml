@@ -49,6 +49,10 @@ flutter:
         - asset: assets/fonts/Montserrat-Italic-VariableFont_wght.ttf
         - asset: assets/fonts/Montserrat-VariableFont_wght.ttf
           style: italic
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-VariableFont_wght.ttf
+          style: italic
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/images/des_logo.png

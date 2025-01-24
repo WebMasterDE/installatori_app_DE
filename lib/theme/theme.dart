@@ -5,7 +5,7 @@ class CustomTheme {
   static getTheme(){
 
     return ThemeData(
-      fontFamily: 'Montserrat',
+      fontFamily: 'Outfit',
       textTheme: TextTheme(
         titleLarge: TextStyle(
           color: Colors.black,

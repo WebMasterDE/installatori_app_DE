@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   static const route = '/';
 
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -49,34 +56,43 @@ class LoginPage extends StatelessWidget {
                 SizedBox(height: 30),
                 Flexible(
                     child: TextField(
-                        obscureText: false,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'email',
-                            labelStyle:
-                                Theme.of(context).textTheme.labelSmall))),
+                  obscureText: false,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'email',
+                    labelStyle: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
+                )),
                 SizedBox(height: 10),
                 Flexible(
                     child: TextField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Password',
-                            labelStyle:
-                                Theme.of(context).textTheme.labelSmall))),
+                  obscureText: _obscureText,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Password',
+                      labelStyle: Theme.of(context).textTheme.labelSmall,
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            setState((){_obscureText = !_obscureText;});
+                          },
+                          icon: Icon(_obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off))),
+                  style: Theme.of(context).textTheme.labelSmall,
+                )),
                 SizedBox(height: 10),
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                      print("entrato");
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/condomini', (route) => false);
-                    },
-                    child: Text('Accedi',
-                        style: Theme.of(context).textTheme.labelSmall),
-                    style: TextButton.styleFrom(
-                        backgroundColor: Colors.orangeAccent),
-                  ),
+                      onPressed: () {
+                        print("entrato");
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, '/condomini', (route) => false);
+                      },
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.orangeAccent),
+                      child: Text('Accedi',
+                          style: Theme.of(context).textTheme.labelSmall)),
                 ),
                 SizedBox(height: 10),
                 Flexible(
@@ -98,6 +114,7 @@ class LoginPage extends StatelessWidget {
         ),
       )),
       backgroundColor: Colors.orangeAccent,
+      resizeToAvoidBottomInset: false,
     );
   }
 }
