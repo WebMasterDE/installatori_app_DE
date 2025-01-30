@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 
 
 class CondominiPage extends StatefulWidget {
@@ -72,7 +73,7 @@ class _CondominiPageState extends State<CondominiPage> {
                       subtitle: Text('Via Roma 1'),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () {
-                        Navigator.pushNamed(context, '/nuovo_appartamento');
+                        Navigator.pushNamed(context, '/appartamenti', arguments: AppartamentiPageArgs(data: {'id': index}));
                       },
                     ),
                   );

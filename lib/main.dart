@@ -17,9 +17,9 @@ class AppInstallatori extends StatelessWidget {
       theme: CustomTheme.getTheme(),
       debugShowCheckedModeBanner : false,
       initialRoute: '/',
-      onGenerateRoute: (setting) {
+      onGenerateRoute: (settings) {
         return MaterialPageRoute(
-          builder: Routes(setting).getRoute()[setting.name],
+          builder: Routes(settings).getRoute()[settings.name],
         );
       }
     );
