@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiRequests {
 
-  static const String BASE_URL = 'http://192.168.2.211:3000/api/';
+  static const String BASE_URL = 'http://192.168.8.182:8443/api/';
 
   static Future<dynamic> sendRequest(String url, String method, Map<String, dynamic> body, {Map<String, String>? headers}) async {
     try {

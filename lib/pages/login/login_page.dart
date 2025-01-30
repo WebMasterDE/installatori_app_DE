@@ -13,13 +13,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
   bool _wrongCred = false;
-  
+
   final email = TextEditingController();
   final password = TextEditingController();
 
   Future<bool> login() {
     final AuthProvider authProvider = AuthProvider();
-
     return authProvider.login(email.text, password.text);
   }
 
@@ -43,52 +42,53 @@ class _LoginPageState extends State<LoginPage> {
         ),
         backgroundColor: Colors.orangeAccent,
       ),
-      body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Card(
-              elevation: 10,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              color: Colors.white,
-              child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Flexible(
-                        child: Text('Benvenuto in DE Installation',
-                            style: Theme.of(context).textTheme.titleMedium)),
-                    SizedBox(height: 30),
-                    Flexible(
-                        child: Image.asset(
-                      'assets/images/des_logo.png',
-                      width: 50,
-                      height: 50,
-                    )),
-                    SizedBox(height: 30),
-                    if(_wrongCred)
-                      Flexible(
-                        child: Text(
-                          "Credenziali errate",
-                          style: Theme.of(context).textTheme.displaySmall,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
-                        )
-                      ),
-                    SizedBox(height: 10),
-                    Flexible(
-                      child: TextField(
-                        controller: email,
-                        obscureText: false,
-                        decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                          labelText: 'email',
-                          labelStyle: Theme.of(context).textTheme.labelSmall,
+          return Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: keyboardHeight, top: 20),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Benvenuto in DE Installation',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      )
-                    ),
-                    SizedBox(height: 10),
-                    Flexible(
-                        child: TextField(
+                        SizedBox(height: 30),
+                        Image.asset(
+                          'assets/images/des_logo.png',
+                          width: 50,
+                          height: 50,
+                        ),
+                        SizedBox(height: 30),
+                        if (_wrongCred)
+                          Text(
+                            "Credenziali errate",
+                            style: Theme.of(context).textTheme.displaySmall,
+                          ),
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: email,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Email',
+                            labelStyle: Theme.of(context).textTheme.labelSmall,
+                          ),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        SizedBox(height: 10),
+                        TextField(
                           controller: password,
                           obscureText: _obscureText,
                           decoration: InputDecoration(
@@ -97,57 +97,64 @@ class _LoginPageState extends State<LoginPage> {
                             labelStyle: Theme.of(context).textTheme.labelSmall,
                             suffixIcon: IconButton(
                               onPressed: () {
-                                setState((){_obscureText = !_obscureText;});
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
                               },
-                              icon: Icon(_obscureText
-                                  ? Icons.visibility
-                                  : Icons.visibility_off)
-                            )
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                            ),
                           ),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    )),
-                    SizedBox(height: 10),
-                    Center(
-                      child: TextButton(
-                          onPressed: () async {
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, '/condomini', (route) => false);
-                            /*if(await login()) {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context, '/condomini', (route) => false);
-                            }else{
-                              setState(() {
-                                _wrongCred = true;
-                              });
-                            }*/
-                          },
-                          style: TextButton.styleFrom(
-                              backgroundColor: Colors.orangeAccent),
-                          child: Text('Accedi',
-                              style: Theme.of(context).textTheme.labelSmall)),
-                    ),
-                    SizedBox(height: 10),
-                    Flexible(
-                      child: Text(
-                        'Prodotto da Divisione Energia Servizi Srl',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Flexible(
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        SizedBox(height: 10),
+                        Center(
+                          child: TextButton(
+                            onPressed: () async {
+                              if (await login()) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, '/condomini', (route) => false);
+                              } else {
+                                setState(() {
+                                  _wrongCred = true;
+                                });
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.orangeAccent),
+                            child: Text(
+                              'Accedi',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Prodotto da Divisione Energia Servizi Srl',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Image.asset(
-                        'assets/images/G_de_logo.png',
-                        width: 50,
-                        height: 50,
-                      )),
-                    )
-                  ])),
+                            'assets/images/G_de_logo.png',
+                            width: 50,
+                            height: 50,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          )
-        ),
+          );
+        },
+      ),
       backgroundColor: Colors.orangeAccent,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
     );
   }
 }

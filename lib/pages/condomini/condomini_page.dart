@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 
+import 'package:installatori_de/providers/condomini_provider.dart';
 
 class CondominiPage extends StatefulWidget {
   static const route = '/condomini';
@@ -13,6 +14,22 @@ class CondominiPage extends StatefulWidget {
 }
 
 class _CondominiPageState extends State<CondominiPage> {
+  List<dynamic> _condominiList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCondomini();
+  }
+
+  Future<void> _fetchCondomini() async {
+    final CondominiProvider condominiProvider = CondominiProvider();
+    final data = await condominiProvider.get_ticket_condomini();
+    setState(() {
+      _condominiList = data['data'];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,22 +43,35 @@ class _CondominiPageState extends State<CondominiPage> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: () => showDialog(context: context, builder: (BuildContext context)=> AlertDialog(
-                  title: Text("Sei sicuro di voler uscire?", style: Theme.of(context).textTheme.titleMedium),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(backgroundColor:  Color.fromRGBO(154, 247, 155, 1)),
-                      child: Text('Annulla', style: Theme.of(context).textTheme.labelSmall),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/',(route) => false),
-                      style: TextButton.styleFrom(backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
-                      child: Text('Esci', style:  Theme.of(context).textTheme.labelSmall),
-                    ),
-                  ],
-                  backgroundColor: Colors.orangeAccent,
-                )),
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                          title: Text("Sei sicuro di voler uscire?",
+                              style: Theme.of(context).textTheme.titleMedium),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      Color.fromRGBO(154, 247, 155, 1)),
+                              child: Text('Annulla',
+                                  style:
+                                      Theme.of(context).textTheme.labelSmall),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context, '/', (route) => false),
+                              style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromARGB(255, 255, 0, 0)),
+                              child: Text('Esci',
+                                  style:
+                                      Theme.of(context).textTheme.labelSmall),
+                            ),
+                          ],
+                          backgroundColor: Colors.orangeAccent,
+                        )),
                 icon: Icon(
                   Icons.logout,
                 ),
@@ -57,20 +87,29 @@ class _CondominiPageState extends State<CondominiPage> {
           children: [
             Text(
               'Condomini',
-              style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.left,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.left,
             ),
             SizedBox(
               height: 20,
             ),
             Flexible(
               child: ListView.builder(
-                itemCount: 10,
+                itemCount: _condominiList.length,
                 itemBuilder: (context, index) {
+                  final condominio = _condominiList[index];
                   return Card(
                     child: ListTile(
-                      leading: Icon(HeroiconsSolid.buildingOffice2, color: Color.fromRGBO(255, 146, 7, 1),),
-                      title: Text('Condominio $index'),
-                      subtitle: Text('Via Roma 1'),
+                      leading: Icon(
+                        HeroiconsSolid.buildingOffice2,
+                        color: Color.fromRGBO(255, 146, 7, 1),
+                      ),
+                      title: Text("Condominio: " + condominio['nome']),
+                      subtitle: Text(condominio['indirizzo'] +
+                          " " +
+                          condominio['citta'] +
+                          " " +
+                          condominio['cap']),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.pushNamed(context, '/appartamenti', arguments: AppartamentiPageArgs(data: {'id': index}));
