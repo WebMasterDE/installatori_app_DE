@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppartamentiPage extends StatelessWidget {
+    static const route = '/nuovo_appartamento';
+
   const AppartamentiPage({super.key});
 
   @override
