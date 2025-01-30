@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/providers/auth_provider.dart';
+import 'package:installatori_de/theme/colors.dart';
 
 class LoginPage extends StatefulWidget {
   static const route = '/';
@@ -40,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: CustomColors.primaryBackground
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -110,25 +112,23 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 30),
                         Center(
-                          child: TextButton(
+                          child: CustomButton(
                             onPressed: () async {
-                              if (await login()) {
+                              /*if (await login()) {
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, '/condomini', (route) => false);
                               } else {
                                 setState(() {
                                   _wrongCred = true;
                                 });
-                              }
+                              }*/
+                              Navigator.pushNamedAndRemoveUntil(
+                                    context, '/condomini', (route) => false);
+
                             },
-                            style: TextButton.styleFrom(
-                                backgroundColor: Colors.orangeAccent),
-                            child: Text(
-                              'Accedi',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
+                            text: 'Accedi',
                           ),
                         ),
                         SizedBox(height: 10),
@@ -153,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         },
       ),
-      backgroundColor: Colors.orangeAccent,
+      backgroundColor: CustomColors.primaryBackground,
       resizeToAvoidBottomInset: true,
     );
   }

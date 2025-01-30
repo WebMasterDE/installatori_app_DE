@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
+import 'package:installatori_de/pages/appartamenti/new_appartamento_page.dart';
 import 'package:installatori_de/pages/condomini/condomini_page.dart';
 import 'package:installatori_de/pages/login/login_page.dart';
-import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 
 class Routes{
 
@@ -17,7 +17,8 @@ class Routes{
       CondominiPage.route: (_) => const CondominiPage(),
       AppartamentiPage.route: (_) => AppartamentiPage(
         arguments: settings.arguments as AppartamentiPageArgs,
-      )
+      ),
+      NewAppartamentoPage.route: (_) => const NewAppartamentoPage(),
     };
 
   }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
-
 import 'package:installatori_de/providers/condomini_provider.dart';
+import 'package:installatori_de/theme/colors.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class CondominiPage extends StatefulWidget {
   static const route = '/condomini';
@@ -14,7 +15,7 @@ class CondominiPage extends StatefulWidget {
 }
 
 class _CondominiPageState extends State<CondominiPage> {
-  List<dynamic> _condominiList = [];
+  late Future<List<dynamic>> _condominiList;
 
   @override
   void initState() {
@@ -24,10 +25,8 @@ class _CondominiPageState extends State<CondominiPage> {
 
   Future<void> _fetchCondomini() async {
     final CondominiProvider condominiProvider = CondominiProvider();
-    final data = await condominiProvider.get_ticket_condomini();
-    setState(() {
-      _condominiList = data['data'];
-    });
+    _condominiList = condominiProvider.get_ticket_condomini();
+    
   }
 
   @override
@@ -39,7 +38,7 @@ class _CondominiPageState extends State<CondominiPage> {
             padding: const EdgeInsets.all(8.0),
             child: Container(
               decoration: BoxDecoration(
-                color: Color.fromRGBO(255, 146, 7, 1),
+                color: CustomColors.iconColor,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -70,7 +69,7 @@ class _CondominiPageState extends State<CondominiPage> {
                                       Theme.of(context).textTheme.labelSmall),
                             ),
                           ],
-                          backgroundColor: Colors.orangeAccent,
+                          backgroundColor: CustomColors.iconColor,
                         )),
                 icon: Icon(
                   Icons.logout,
@@ -79,7 +78,7 @@ class _CondominiPageState extends State<CondominiPage> {
             ),
           )
         ],
-        backgroundColor: Color.fromRGBO(255, 252, 248, 100),
+        backgroundColor: CustomColors.secondaryBackground,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -94,35 +93,61 @@ class _CondominiPageState extends State<CondominiPage> {
               height: 20,
             ),
             Flexible(
-              child: ListView.builder(
-                itemCount: _condominiList.length,
-                itemBuilder: (context, index) {
-                  final condominio = _condominiList[index];
-                  return Card(
-                    child: ListTile(
-                      leading: Icon(
-                        HeroiconsSolid.buildingOffice2,
-                        color: Color.fromRGBO(255, 146, 7, 1),
-                      ),
-                      title: Text("Condominio: " + condominio['nome']),
-                      subtitle: Text(condominio['indirizzo'] +
-                          " " +
-                          condominio['citta'] +
-                          " " +
-                          condominio['cap']),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/appartamenti', arguments: AppartamentiPageArgs(data: {'id': index}));
+              child: FutureBuilder(
+                future: _condominiList, 
+                builder: (context, snapshot){
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Skeletonizer(
+                      child: ListView.builder(
+                        itemCount: 5,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(
+                              leading: Icon(
+                                HeroiconsSolid.buildingOffice2,
+                                color: CustomColors.iconColor,
+                              ),
+                              title: Text(''),
+                              subtitle: Text(''),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                            ),
+                          );
+                        }
+                      )
+                    );
+                  }else{
+
+
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final condominio = snapshot.data![index];
+                        return Card(
+                          child: ListTile(
+                            leading: Icon(
+                              HeroiconsSolid.buildingOffice2,
+                              color: CustomColors.iconColor,
+                            ),
+                            title: Text("Condominio: ${condominio['nome']}"),
+                            subtitle: Text("${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
+                            trailing: Icon(Icons.arrow_forward_ios),
+                            onTap: () {
+                              Navigator.pushNamed(context, '/appartamenti', arguments: AppartamentiPageArgs(data: {'id': condominio['id_ana_condominio'], 'nome': condominio['nome']}));
+                            },
+                          ),
+                        );
                       },
-                    ),
-                  );
-                },
-              ),
+                    );
+                  }
+                }
+              )
+              
             ),
           ],
         ),
       ),
-      backgroundColor: Color.fromRGBO(255, 252, 248, 100),
+      backgroundColor: CustomColors.secondaryBackground,
     );
   }
 }
