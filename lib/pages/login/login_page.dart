@@ -19,6 +19,20 @@ class _LoginPageState extends State<LoginPage> {
   final email = TextEditingController();
   final password = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    check_token();
+  }
+
+  Future<void> check_token() async {
+    final AuthProvider authProvider = AuthProvider();
+    if (await authProvider.check_token()) {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/condomini', (route) => false);
+    }
+  }
+
   Future<bool> login() {
     final AuthProvider authProvider = AuthProvider();
     return authProvider.login(email.text, password.text);
@@ -28,22 +42,21 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.build),
-              SizedBox(width: 8),
-              Text(
-                'DE Installation',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
+          title: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.build),
+                SizedBox(width: 8),
+                Text(
+                  'DE Installation',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
           ),
-        ),
-        backgroundColor: CustomColors.primaryBackground
-      ),
+          backgroundColor: CustomColors.primaryBackground),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
@@ -126,7 +139,6 @@ class _LoginPageState extends State<LoginPage> {
                               }
                               // Navigator.pushNamedAndRemoveUntil(
                               //       context, '/condomini', (route) => false);
-
                             },
                             text: 'Accedi',
                           ),

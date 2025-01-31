@@ -21,12 +21,12 @@ class _CondominiPageState extends State<CondominiPage> {
   @override
   void initState() {
     super.initState();
-    _fetchCondomini();
+    _fetchCondomini(context);
   }
 
-  Future<void> _fetchCondomini() async {
+  Future<void> _fetchCondomini(BuildContext context) async {
     final CondominiProvider condominiProvider = CondominiProvider();
-    _condominiList = condominiProvider.get_ticket_condomini();
+    _condominiList = condominiProvider.get_ticket_condomini(context);
   }
 
   Future<bool> logout() {

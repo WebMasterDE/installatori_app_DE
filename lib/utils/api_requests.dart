@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiRequests {
-  static const String BASE_URL = 'http://192.168.95.182:8443/api/';
+  static const String BASE_URL = 'http://192.168.195.182:8443/api/';
+  static bool _isRefreshing = false;
 
   static Future<dynamic> sendRequest(
       String url, String method, Map<String, dynamic> body,
@@ -23,7 +24,10 @@ class ApiRequests {
       var responseBody = json.decode(response.body);
       //caso in cui il token è scaduto durante l'uso dello'applicazione
       if (responseBody['error'] == true &&
-          responseBody['message'] == 'jwt expired') {
+          responseBody['message'] == 'jwt expired' &&
+          !_isRefreshing) {
+        _isRefreshing = true;
+
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         final String refreshToken = prefs.getString('refreshToken') ?? '';
 
@@ -32,7 +36,6 @@ class ApiRequests {
         };
         //faccio la richiesta al backen per verificare il refreshToken e nel caso ricevo un nuovo token e refreshToken
         final rs = await sendRequest('refresh', 'GET', {}, headers: headers_r);
-        print(rs);
         if (rs['error'] == false) {
           prefs.setString('token', rs['data']['token']);
           prefs.setString('refreshToken', rs['data']['refreshToken']);
@@ -40,21 +43,25 @@ class ApiRequests {
           final Map<String, String> newHeaders = {
             'Authorization': 'Bearer ${rs['data']['token']}'
           };
+          _isRefreshing = false;
 
           return await sendRequest(url, method, body, headers: newHeaders);
         } //caso in cui il refreshToken è scaduto
         else {
-          return null;
+          _isRefreshing = false;
+          return {'errore_double_token': true};
         }
       }
 
       return responseBody;
     } catch (e) {
+      _isRefreshing = false;
       return null;
     }
   }
 
-  static Future<dynamic> sendAuthRequest(String url, String method, Map<String, dynamic> body) async {
+  static Future<dynamic> sendAuthRequest(
+      String url, String method, Map<String, dynamic> body) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String token = prefs.getString('token') ?? '';
@@ -91,5 +98,4 @@ class ApiRequests {
       return null;
     }
   }
-
 }
