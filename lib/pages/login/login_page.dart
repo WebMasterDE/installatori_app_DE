@@ -116,16 +116,16 @@ class _LoginPageState extends State<LoginPage> {
                         Center(
                           child: CustomButton(
                             onPressed: () async {
-                              /*if (await login()) {
+                              if (await login()) {
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, '/condomini', (route) => false);
                               } else {
                                 setState(() {
                                   _wrongCred = true;
                                 });
-                              }*/
-                              Navigator.pushNamedAndRemoveUntil(
-                                    context, '/condomini', (route) => false);
+                              }
+                              // Navigator.pushNamedAndRemoveUntil(
+                              //       context, '/condomini', (route) => false);
 
                             },
                             text: 'Accedi',

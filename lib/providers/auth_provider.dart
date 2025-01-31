@@ -24,4 +24,22 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
+
+  Future<bool> logout() async{
+    final response = await ApiRequests.sendAuthRequest('logout', 'POST', {});
+
+    if(response['error'] == false) {
+      print('logout');
+      final sharedPref = await SharedPreferences.getInstance();
+      sharedPref.remove('id');
+      sharedPref.remove('email');
+      sharedPref.remove('token');
+      sharedPref.remove('role');
+
+      return true;
+    }else {
+      return false;
+    }
+  }
+
 }

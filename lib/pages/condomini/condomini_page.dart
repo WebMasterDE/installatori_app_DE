@@ -4,6 +4,7 @@ import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:installatori_de/providers/auth_provider.dart';
 
 class CondominiPage extends StatefulWidget {
   static const route = '/condomini';
@@ -26,7 +27,11 @@ class _CondominiPageState extends State<CondominiPage> {
   Future<void> _fetchCondomini() async {
     final CondominiProvider condominiProvider = CondominiProvider();
     _condominiList = condominiProvider.get_ticket_condomini();
-    
+  }
+
+  Future<bool> logout() {
+    final AuthProvider authProvider = AuthProvider();
+    return authProvider.logout();
   }
 
   @override
@@ -58,9 +63,17 @@ class _CondominiPageState extends State<CondominiPage> {
                                       Theme.of(context).textTheme.labelSmall),
                             ),
                             TextButton(
-                              onPressed: () =>
+                              onPressed: () async {
+                                if (await logout()) {
                                   Navigator.pushNamedAndRemoveUntil(
-                                      context, '/', (route) => false),
+                                      context, '/', (route) => false);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Errore durante il logout')));
+                                }
+                              },
                               style: TextButton.styleFrom(
                                   backgroundColor:
                                       const Color.fromARGB(255, 255, 0, 0)),
@@ -93,57 +106,55 @@ class _CondominiPageState extends State<CondominiPage> {
               height: 20,
             ),
             Flexible(
-              child: FutureBuilder(
-                future: _condominiList, 
-                builder: (context, snapshot){
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Skeletonizer(
-                      child: ListView.builder(
-                        itemCount: 5,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: ListTile(
-                              leading: Icon(
-                                HeroiconsSolid.buildingOffice2,
-                                color: CustomColors.iconColor,
+                child: FutureBuilder(
+                    future: _condominiList,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Skeletonizer(
+                            child: ListView.builder(
+                                itemCount: 5,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    child: ListTile(
+                                      leading: Icon(
+                                        HeroiconsSolid.buildingOffice2,
+                                        color: CustomColors.iconColor,
+                                      ),
+                                      title: Text(''),
+                                      subtitle: Text(''),
+                                      trailing: Icon(Icons.arrow_forward_ios),
+                                    ),
+                                  );
+                                }));
+                      } else {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            final condominio = snapshot.data![index];
+                            return Card(
+                              child: ListTile(
+                                leading: Icon(
+                                  HeroiconsSolid.buildingOffice2,
+                                  color: CustomColors.iconColor,
+                                ),
+                                title:
+                                    Text("Condominio: ${condominio['nome']}"),
+                                subtitle: Text(
+                                    "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
+                                trailing: Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/appartamenti',
+                                      arguments: AppartamentiPageArgs(data: {
+                                        'id': condominio['id_ana_condominio'],
+                                        'nome': condominio['nome']
+                                      }));
+                                },
                               ),
-                              title: Text(''),
-                              subtitle: Text(''),
-                              trailing: Icon(Icons.arrow_forward_ios),
-                            ),
-                          );
-                        }
-                      )
-                    );
-                  }else{
-
-
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final condominio = snapshot.data![index];
-                        return Card(
-                          child: ListTile(
-                            leading: Icon(
-                              HeroiconsSolid.buildingOffice2,
-                              color: CustomColors.iconColor,
-                            ),
-                            title: Text("Condominio: ${condominio['nome']}"),
-                            subtitle: Text("${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {
-                              Navigator.pushNamed(context, '/appartamenti', arguments: AppartamentiPageArgs(data: {'id': condominio['id_ana_condominio'], 'nome': condominio['nome']}));
-                            },
-                          ),
+                            );
+                          },
                         );
-                      },
-                    );
-                  }
-                }
-              )
-              
-            ),
+                      }
+                    })),
           ],
         ),
       ),
