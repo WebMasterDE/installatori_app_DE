@@ -27,6 +27,11 @@ dependencies:
   heroicons_flutter: ^0.4.0
   cupertino_stepper: ^0.2.1
   horizontal_stepper_flutter: ^1.0.3
+  path_provider: ^2.1.5
+  permission_handler: ^11.3.1
+  image_picker: ^1.1.2
+  email_validator: ^3.0.0
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

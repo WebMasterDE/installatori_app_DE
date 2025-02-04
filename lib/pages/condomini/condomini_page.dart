@@ -112,64 +112,58 @@ class _CondominiPageState extends State<CondominiPage> {
               height: 20,
             ),
             Flexible(
-              child: FutureBuilder<List<dynamic>>(
-                future: _condominiList,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Skeletonizer(
-                      child: ListView.builder(
-                        itemCount: 5,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: ListTile(
-                              leading: Icon(
-                                HeroiconsSolid.buildingOffice2,
-                                color: CustomColors.iconColor,
+                child: FutureBuilder(
+                    future: _condominiList,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Skeletonizer(
+                            child: ListView.builder(
+                                itemCount: 5,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    child: ListTile(
+                                      leading: Icon(
+                                        HeroiconsSolid.buildingOffice2,
+                                        color: CustomColors.iconColor,
+                                      ),
+                                      title: Text(''),
+                                      subtitle: Text(''),
+                                      trailing: Icon(Icons.arrow_forward_ios),
+                                    ),
+                                  );
+                                }));
+                      } else {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            final condominio = snapshot.data![index];
+                            return Card(
+                              child: ListTile(
+                                leading: Icon(
+                                  HeroiconsSolid.buildingOffice2,
+                                  color: CustomColors.iconColor,
+                                ),
+                                title:
+                                    Text("Condominio: ${condominio['nome']}"),
+                                subtitle: Text(
+                                    "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
+                                trailing: Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/appartamenti',
+                                      arguments: AppartamentiPageArgs(data: {
+                                        'id': condominio['id_ana_condominio'],
+                                        'nome': condominio['nome']
+                                      })
+                                  );
+                                },
                               ),
-                              title: Text(''),
-                              subtitle: Text(''),
-                              trailing: Icon(Icons.arrow_forward_ios),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Errore nel caricamento dei dati'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('Nessun dato disponibile'));
-                  } else {
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final condominio = snapshot.data![index];
-                        return Card(
-                          child: ListTile(
-                            leading: Icon(
-                              HeroiconsSolid.buildingOffice2,
-                              color: CustomColors.iconColor,
-                            ),
-                            title: Text("Condominio: ${condominio['nome']}"),
-                            subtitle: Text(
-                                "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {
-                              Navigator.pushNamed(context, '/appartamenti',
-                                  arguments: AppartamentiPageArgs(data: {
-                                    'id': condominio['id_ana_condominio'],
-                                    'nome': condominio['nome']
-                                  }));
-                            },
-                          ),
+                            );
+                          }
                         );
-                      },
-                    );
-                  }
-                },
-              ),
-            ),
-            SizedBox(height: 20),
-
+                      }
+                    }
+                  )
+            ) 
           ],
         ),
       ),
