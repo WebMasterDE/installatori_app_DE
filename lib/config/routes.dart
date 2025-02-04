@@ -20,7 +20,9 @@ class Routes {
       NewAppartamentoPage.route: (_) => NewAppartamentoPage(
             arguments: settings.arguments as NewAppartamentoPageArgs,
           ),
-      SelezioneStrumentiPage.route: (_) => SelezioneStrumentiPage()
+      SelezioneStrumentiPage.route: (_) => SelezioneStrumentiPage(
+            arguments: settings.arguments as SelezioneStrumentiPageArgs,
+          )
     };
   }
 }

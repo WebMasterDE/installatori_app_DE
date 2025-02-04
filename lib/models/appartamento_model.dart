@@ -1,3 +1,5 @@
+import 'package:installatori_de/models/ripartitori_model.dart';
+
 class AppartamentoModel {
   int? id;
   String interno;
@@ -7,8 +9,10 @@ class AppartamentoModel {
   String nome;
   String cognome;
   String mail;
-  //Aggiungere lista ripartitori (oggetti di tipo Ripartitore)
-  
+  Map<String, StatoRipartitori> raffrescamento;
+  Map<String, StatoRipartitori> riscaldamento;
+  Map<String, StatoRipartitori> acquaCalda;
+  Map<String, StatoRipartitori> acquaFredda;
 
   AppartamentoModel({
     this.id,
@@ -18,11 +22,18 @@ class AppartamentoModel {
     this.pathUploadImage,
     required this.nome,
     required this.cognome,
-    required this.mail
-  });
+    required this.mail,
+    Map<String, StatoRipartitori>? raffrescamento,
+    Map<String, StatoRipartitori>? riscaldamento,
+    Map<String, StatoRipartitori>? acquaCalda,
+    Map<String, StatoRipartitori>? acquaFredda,
+  })  : raffrescamento = raffrescamento ?? {},
+        riscaldamento = riscaldamento ?? {},
+        acquaCalda = acquaCalda ?? {},
+        acquaFredda = acquaFredda ?? {};
 
-  @override
-  factory AppartamentoModel.fromJson(Map<String, dynamic> json) => AppartamentoModel(
+  factory AppartamentoModel.fromJson(Map<String, dynamic> json) {
+    return AppartamentoModel(
       id: json['id'],
       interno: json['interno'],
       piano: json['piano'],
@@ -30,20 +41,68 @@ class AppartamentoModel {
       pathUploadImage: json['pathUploadImage'],
       nome: json['nome'],
       cognome: json['cognome'],
-      mail: json['mail']
-  );
+      mail: json['mail'],
+      raffrescamento: (json['raffrescamento'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
+          ) ??
+          {},
+      riscaldamento: (json['riscaldamento'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
+          ) ??
+          {},
+      acquaCalda: (json['acquaCalda'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
+          ) ??
+          {},
+      acquaFredda: (json['acquaFredda'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
+          ) ??
+          {},
+    );
+  }
 
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'interno': interno,
       'piano': piano,
       'scala': scala,
       'pathUploadImage': pathUploadImage,
       'nome': nome,
       'cognome': cognome,
-      'mail': mail
+      'mail': mail,
+      'raffrescamento':
+          raffrescamento.map((key, value) => MapEntry(key, value.toJson())),
+      'riscaldamento':
+          riscaldamento.map((key, value) => MapEntry(key, value.toJson())),
+      'acquaCalda':
+          acquaCalda.map((key, value) => MapEntry(key, value.toJson())),
+      'acquaFredda':
+          acquaFredda.map((key, value) => MapEntry(key, value.toJson())),
     };
   }
+}
 
-      
+class StatoRipartitori {
+  bool completato;
+  List<RipartitoriModel> ripartitori;
+
+  StatoRipartitori({this.completato = false, required this.ripartitori});
+
+  factory StatoRipartitori.fromJson(Map<String, dynamic> json) {
+    return StatoRipartitori(
+      completato: json['completato'] ?? false,
+      ripartitori: (json['ripartitori'] as List<dynamic>?)
+              ?.map((e) => RipartitoriModel.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'completato': completato,
+      'ripartitori': ripartitori.map((e) => e.toJson()).toList(),
+    };
+  }
 }

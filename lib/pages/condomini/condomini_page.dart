@@ -104,10 +104,6 @@ class _CondominiPageState extends State<CondominiPage> {
                         SizedBox(
               height: 20,
             ),
-                                        CustomHorizontalStepper(
-          steps: const ["1", "2", "3", "4"],
-          currentStep: 1,
-        ),
             SizedBox(
               height: 20,
             ),
