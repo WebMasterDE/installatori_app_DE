@@ -14,6 +14,7 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 
@@ -293,21 +294,26 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
   void _takePicture() async {
     try {
 
-      final image = await ImagePicker().pickImage(source: ImageSource.camera);
+      final status = await Permission.camera.request();
 
-      if(image == null) return;
+      if(status.isGranted){
 
-      final Directory appDir = await getApplicationDocumentsDirectory();
+        final image = await ImagePicker().pickImage(source: ImageSource.camera);
 
-      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+        if(image == null) return;
 
-      _pathUploadImage = path.join(appDir.path, '$_idAnaCondominio-$timestamp.jpg');
+        final Directory appDir = await getApplicationDocumentsDirectory();
 
-      final File newImage = await File(image.path).copy(_pathUploadImage!);
+        final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
 
-      setState(() {
-        _uploadImage = newImage;
-      });
+        _pathUploadImage = path.join(appDir.path, '$_idAnaCondominio-$timestamp.jpg');
+
+        final File newImage = await File(image.path).copy(_pathUploadImage!);
+
+        setState(() {
+          _uploadImage = newImage;
+        });
+      }
 
 
     } on PlatformException catch(e) {
