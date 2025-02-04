@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:installatori_de/components/stepper.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -26,7 +27,7 @@ class _CondominiPageState extends State<CondominiPage> {
 
   Future<void> _fetchCondomini(BuildContext context) async {
     final CondominiProvider condominiProvider = CondominiProvider();
-    _condominiList = condominiProvider.get_ticket_condomini(context);
+    _condominiList = condominiProvider.getTicketCondomini(context);
   }
 
   Future<bool> logout() {
@@ -59,8 +60,7 @@ class _CondominiPageState extends State<CondominiPage> {
                                   backgroundColor:
                                       Color.fromRGBO(154, 247, 155, 1)),
                               child: Text('Annulla',
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall),
+                                  style: Theme.of(context).textTheme.labelSmall),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -78,8 +78,7 @@ class _CondominiPageState extends State<CondominiPage> {
                                   backgroundColor:
                                       const Color.fromARGB(255, 255, 0, 0)),
                               child: Text('Esci',
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall),
+                                  style: Theme.of(context).textTheme.labelSmall),
                             ),
                           ],
                           backgroundColor: CustomColors.iconColor,
@@ -102,59 +101,75 @@ class _CondominiPageState extends State<CondominiPage> {
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.left,
             ),
+                        SizedBox(
+              height: 20,
+            ),
+                                        CustomHorizontalStepper(
+          steps: const ["1", "2", "3", "4"],
+          currentStep: 1,
+        ),
             SizedBox(
               height: 20,
             ),
             Flexible(
-                child: FutureBuilder(
-                    future: _condominiList,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Skeletonizer(
-                            child: ListView.builder(
-                                itemCount: 5,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    child: ListTile(
-                                      leading: Icon(
-                                        HeroiconsSolid.buildingOffice2,
-                                        color: CustomColors.iconColor,
-                                      ),
-                                      title: Text(''),
-                                      subtitle: Text(''),
-                                      trailing: Icon(Icons.arrow_forward_ios),
-                                    ),
-                                  );
-                                }));
-                      } else {
-                        return ListView.builder(
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            final condominio = snapshot.data![index];
-                            return Card(
-                              child: ListTile(
-                                leading: Icon(
-                                  HeroiconsSolid.buildingOffice2,
-                                  color: CustomColors.iconColor,
-                                ),
-                                title:
-                                    Text("Condominio: ${condominio['nome']}"),
-                                subtitle: Text(
-                                    "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
-                                trailing: Icon(Icons.arrow_forward_ios),
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/appartamenti',
-                                      arguments: AppartamentiPageArgs(data: {
-                                        'id': condominio['id_ana_condominio'],
-                                        'nome': condominio['nome']
-                                      }));
-                                },
+              child: FutureBuilder<List<dynamic>>(
+                future: _condominiList,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Skeletonizer(
+                      child: ListView.builder(
+                        itemCount: 5,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(
+                              leading: Icon(
+                                HeroiconsSolid.buildingOffice2,
+                                color: CustomColors.iconColor,
                               ),
-                            );
-                          },
+                              title: Text(''),
+                              subtitle: Text(''),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Errore nel caricamento dei dati'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Nessun dato disponibile'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final condominio = snapshot.data![index];
+                        return Card(
+                          child: ListTile(
+                            leading: Icon(
+                              HeroiconsSolid.buildingOffice2,
+                              color: CustomColors.iconColor,
+                            ),
+                            title: Text("Condominio: ${condominio['nome']}"),
+                            subtitle: Text(
+                                "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
+                            trailing: Icon(Icons.arrow_forward_ios),
+                            onTap: () {
+                              Navigator.pushNamed(context, '/appartamenti',
+                                  arguments: AppartamentiPageArgs(data: {
+                                    'id': condominio['id_ana_condominio'],
+                                    'nome': condominio['nome']
+                                  }));
+                            },
+                          ),
                         );
-                      }
-                    })),
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+            SizedBox(height: 20),
+
           ],
         ),
       ),
