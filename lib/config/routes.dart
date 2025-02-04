@@ -18,7 +18,9 @@ class Routes{
       AppartamentiPage.route: (_) => AppartamentiPage(
         arguments: settings.arguments as AppartamentiPageArgs,
       ),
-      NewAppartamentoPage.route: (_) => const NewAppartamentoPage(),
+      NewAppartamentoPage.route: (_) => NewAppartamentoPage(
+        arguments: settings.arguments as NewAppartamentoPageArgs,
+      ),
     };
 
   }

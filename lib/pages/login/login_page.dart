@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/providers/auth_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 class LoginPage extends StatefulWidget {
   static const route = '/';
@@ -15,11 +17,29 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
   bool _wrongCred = false;
+  bool _isCameraAllowed = false;
+  String _errorText = '';
 
   final email = TextEditingController();
   final password = TextEditingController();
 
-  Future<bool> login() {
+  Future<bool> login() async {
+    final status = await Permission.camera.request();
+
+    if(status.isDenied){
+      return false;
+    }
+
+    if(status.isPermanentlyDenied){
+      openAppSettings();
+      return false;
+    }
+
+    if(status.isGranted){
+      _isCameraAllowed = true;
+    }
+
+
     final AuthProvider authProvider = AuthProvider();
     return authProvider.login(email.text, password.text);
   }
@@ -76,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: 30),
                         if (_wrongCred)
                           Text(
-                            "Credenziali errate",
+                            _errorText,
                             style: Theme.of(context).textTheme.displaySmall,
                           ),
                         SizedBox(height: 10),
@@ -116,17 +136,23 @@ class _LoginPageState extends State<LoginPage> {
                         Center(
                           child: CustomButton(
                             onPressed: () async {
-                              /*if (await login()) {
+                              if (await login()) {
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, '/condomini', (route) => false);
-                              } else {
-                                setState(() {
-                                  _wrongCred = true;
-                                });
-                              }*/
-                              Navigator.pushNamedAndRemoveUntil(
-                                    context, '/condomini', (route) => false);
+                              }else{
 
+                                if(_isCameraAllowed){
+                                  setState(() {
+                                    _wrongCred = true;
+                                    _errorText = 'Credenziali errate';
+                                  });
+                                }else{
+                                  setState(() {
+                                    _wrongCred = true;
+                                    _errorText = 'È necessario dare l\'accesso alla camera';
+                                  });
+                                }
+                              }
                             },
                             text: 'Accedi',
                           ),

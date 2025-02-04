@@ -13,5 +13,7 @@ class CustomColors {
 
   static const Color iconColor = Color(0xFFFF9207);
 
+  static const Color errorColor = Color(0xFFE51B0D);
+
 
 }

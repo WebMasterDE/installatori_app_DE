@@ -108,8 +108,8 @@ class _CondominiPageState extends State<CondominiPage> {
                                 HeroiconsSolid.buildingOffice2,
                                 color: CustomColors.iconColor,
                               ),
-                              title: Text(''),
-                              subtitle: Text(''),
+                              title: Text('Titolo'),
+                              subtitle: Text('sottotitolo'),
                               trailing: Icon(Icons.arrow_forward_ios),
                             ),
                           );

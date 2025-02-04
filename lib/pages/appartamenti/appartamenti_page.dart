@@ -4,6 +4,8 @@ import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/providers/appartamenti_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:installatori_de/pages/appartamenti/new_appartamento_page.dart';
+
 
 
 class AppartamentiPage extends StatefulWidget {
@@ -65,7 +67,7 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
                     title: Text('Nuovo appartamento'),
                     subtitle: Text('Aggiungi un nuovo appartamento'),
                     onTap: () {
-                      Navigator.pushNamed(context, '/newAppartamento');
+                      Navigator.pushNamed(context, '/newAppartamento', arguments: NewAppartamentoPageArgs(data: {'id': _idAnaCondominio}));
                     },
                   ),
                 ),
@@ -119,11 +121,14 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
           height: 50,
           width: double.infinity,
 
-          child: CustomButton(
-            text: 'Salva ed esci',
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: CustomButton(
+              text: 'Salva ed esci',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           )
         )
     );

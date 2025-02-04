@@ -3,14 +3,39 @@ import 'package:flutter/material.dart';
 class CustomTextfield extends StatelessWidget {
 
   final String text;
+  final TextEditingController? controller;
+  final bool required;
+  final String? Function(String?)? validator;
 
   const CustomTextfield({
     super.key,
     required this.text,
-    });
+    this.controller,
+    this.required = false,
+    this.validator
+  });
 
   @override
   Widget build(BuildContext context) {
+
+    String? Function(String?) validatorFunction;
+
+    if(required && validator == null){
+      validatorFunction = (value) {
+                              if (value == null || value.isEmpty){
+                                return 'Campo richisto';
+                              }
+                              return null;
+                          };
+    }else if (required && validator != null){
+      validatorFunction = validator!;
+    }else{
+      validatorFunction = (value) {return null;};
+    }
+
+
+
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -21,12 +46,17 @@ class CustomTextfield extends StatelessWidget {
         SizedBox(
           height: 7,
         ),
-        TextField(
+        TextFormField(
+          controller: controller,
           decoration: InputDecoration(
-            labelText: text,
+            hintText: text,
             border: OutlineInputBorder(),
           ),
+          validator: validatorFunction,
         ),
+        SizedBox(
+          height: 10,
+        )
       ],
     );
   }
