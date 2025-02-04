@@ -23,6 +23,12 @@ class _LoginPageState extends State<LoginPage> {
   final email = TextEditingController();
   final password = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    check_token();
+  }
+
   Future<bool> login() async {
     final status = await Permission.camera.request();
 
@@ -39,31 +45,37 @@ class _LoginPageState extends State<LoginPage> {
       _isCameraAllowed = true;
     }
 
-
     final AuthProvider authProvider = AuthProvider();
     return authProvider.login(email.text, password.text);
+  }
+
+  Future<void> check_token() async {
+    final AuthProvider authProvider = AuthProvider();
+    if (await authProvider.check_token()) {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/condomini', (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.build),
-              SizedBox(width: 8),
-              Text(
-                'DE Installation',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
+          title: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.build),
+                SizedBox(width: 8),
+                Text(
+                  'DE Installation',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
           ),
-        ),
-        backgroundColor: CustomColors.primaryBackground
-      ),
+          backgroundColor: CustomColors.primaryBackground),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
