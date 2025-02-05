@@ -134,51 +134,6 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
                     
                   ],
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Foto campanello',
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    if (_uploadImage != null)
-                      Expanded(
-                          child: CustomTextfield(
-                              text: 'Iterno',
-                              controller: _internoController,
-                              required: true)),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Expanded(
-                          child: CustomTextfield(
-                              text: 'Scala',
-                              controller: _scalaController,
-                              required: true)),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextfield(
-                            text: 'Piano',
-                            controller: _pianoController,
-                            required: true),
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Expanded(child: SizedBox())
-                    ],
-                  ),
                   SizedBox(
                     height: 20,
                   ),
