@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
-import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:installatori_de/components/stepper.dart';
+import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
+
 
 class SelezioneStrumentiPage extends StatefulWidget {
   static const route = '/selezione_strumenti';
@@ -26,7 +27,8 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
   late Future<List<dynamic>> _strumentiCondominio;
 
   int _idAnaCondominio = 0;
-  String _internoAppartamento = "";
+  int _idAppartamento = 0;
+  AppartamentoModel? _appartamento;
   int _selectedIndex = -1;
   String _selectedStrumento = "";
 
@@ -35,10 +37,21 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
     super.initState();
 
     _idAnaCondominio = widget.arguments.data['id'];
-    _internoAppartamento = widget.arguments.data['interno'];
+    _idAppartamento = widget.arguments.data['idAppartamento'];
+
+    getAppartamento();
 
     _strumentiCondominio =
         CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
+  }
+
+  void getAppartamento() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? ap = sp.getString('appartamento_temp_$_idAppartamento');
+
+    if(ap != null){
+      _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
+    }
   }
 
   @override
@@ -71,7 +84,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                   List<Widget> listViewChildren = [];
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    for (var i = 0; i < 3; i++) {
+                    for (var i = 0; i < 4; i++) {
                       listViewChildren.add(Skeletonizer(
                           child: Card(
                         child: ListTile(
@@ -133,7 +146,9 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
               Expanded(
                 child: CustomButton(
                   text: 'Indietro',
-                  onPressed: () {
+                  onPressed: () async {
+                    final sh = await SharedPreferences.getInstance();
+                    sh.setInt('id_appartamento_from', _idAppartamento);
                     Navigator.pop(context);
                   },
                 ),
@@ -157,7 +172,42 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
 
   void _stepSucc() async {
     if (_selectedIndex != -1) {
+
+      switch (_selectedStrumento) {
+        case "Contatore Freddo" :
+          _appartamento!.raffrescamento = StatoRipartitori(completato: false, ripartitori: []);
+          break;
+        case  "Contatore Caldo/Freddo" :
+          _appartamento!.riscaldamento = StatoRipartitori(completato: false, ripartitori: []);
+
+          _appartamento!.raffrescamento = StatoRipartitori(completato: false, ripartitori: []);
+          break;
+        case "riscaldamento" || "Contatore Caldo":
+          _appartamento!.riscaldamento = StatoRipartitori(completato: false, ripartitori: []);
+          break;
+        case "Contatore Acqua Calda":
+          _appartamento!.acquaCalda = StatoRipartitori(completato: false, ripartitori: []);
+          break;
+        case "Contatore Acqua Fredda":
+          _appartamento!.acquaFredda = StatoRipartitori(completato: false, ripartitori: []);
+          break;
+      }
+
       final sharedPref = await SharedPreferences.getInstance();
+      sharedPref.setString('appartamento_temp_$_idAppartamento', jsonEncode(_appartamento!.toJson()));
+
+      print(jsonDecode(sharedPref.getString('appartamento_temp_$_idAppartamento')!));
+      
+      Navigator.pushNamed(context, "/newStrumento",
+        arguments:  NewStrumentoPageArgs(data: {
+          'id': _idAnaCondominio,
+          'idAppartamento': _idAppartamento,
+          'selectedStrumento': _selectedStrumento
+        })
+      );
+
+
+      /*final sharedPref = await SharedPreferences.getInstance();
       var condominiList = sharedPref.getString('condomini');
 
       if (condominiList != null) {
@@ -169,7 +219,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
         for (var condominio in cmList) {
           if (condominio.idAnaCondominio == _idAnaCondominio) {
             for (var appartamento in condominio.appartamenti!) {
-              if (appartamento.interno == _internoAppartamento) {
+              if (appartamento.id == _idAppartamento) {
                 switch (_selectedStrumento) {
                   case "Contatore Caldo/Freddo" || "Contatore Freddo" :
                     appartamento.raffrescamento[_selectedStrumento] =
@@ -199,12 +249,12 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
         sharedPref.setString(
             'condomini', jsonEncode(cmList.map((c) => c.toJson()).toList()));
 
-        Navigator.pushNamed(context, "/selezione_strumenti",
+        Navigator.pushNamed(context, "/newStrumento",
             arguments: SelezioneStrumentiPageArgs(data: {
               'id': _idAnaCondominio,
-              'interno': _internoAppartamento,
+              'idAppartamento': _idAppartamento,
             }));
-      }
+      }*/
     }
   }
 }

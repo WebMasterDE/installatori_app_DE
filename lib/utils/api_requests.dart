@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiRequests {
-  static const String BASE_URL = 'http://192.168.232.182:8443/api/';
+  static const String BASE_URL = 'http://192.168.2.211:8443/api/';
   static bool _isRefreshing = false;
 
   static Future<dynamic> sendRequest(

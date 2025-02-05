@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
 import 'package:installatori_de/models/condominio_model.dart';
+import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -56,10 +57,14 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
   bool _isNotCompletedCheck = false;
   bool _isNotCompletedImage = false;
 
+  int _idAppartamento = 0;
+  String _selectedStrumento = '';
+
 
   final _formKey = GlobalKey<FormState>();
 
   String matricolaString = '';
+  AppartamentoModel? _appartamento;
 
 
    @override
@@ -67,7 +72,22 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
     super.initState();
 
     _idAnaCondominio = widget.arguments.data['id'];
+    _idAppartamento = widget.arguments.data['idAppartamento'];
+    _selectedStrumento = widget.arguments.data['selectedStrumento'];
 
+    getAppartamento();
+
+  }
+
+  void getAppartamento() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? ap = sp.getString('appartamento_temp_$_idAppartamento');
+
+    print("test ${jsonEncode(ap)}");
+
+    if(ap != null){
+      _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
+    }
   }
 
   @override
@@ -103,55 +123,56 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                 SizedBox(
                   height: 20,
                 ),
-                Text(
-                  'Tipologia ripartitori',
-                  style: Theme.of(context).textTheme.labelSmall
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  spacing: 2,
-                  children: [
-                    Checkbox(
-                      value: _riscaldamento,
-                      onChanged: (value) {
-                        setState(() {
-                          _riscaldamento = value ?? false;
-                        });
-                      },
-                      activeColor: CustomColors.iconColor,
-                    ),
-                    Text(
-                      "Riscaldamento"
-                    )
-                  ]
-                ),
-                Row(
-                  spacing: 2,
-                  children: [
-                    Checkbox(
-                      value: _raffrescamento,
-                      onChanged: (value) => {
-                        setState(() {
-                          _raffrescamento = value ?? false;
-                        })
-                      },
-                      activeColor: CustomColors.iconColor,
-                    ),
-                    Text(
-                      "Raffrescamento"
-                    )
-                  ]
-                ),
-                if(_isNotCompletedCheck)
+                if(_selectedStrumento == "Contatore Caldo/Freddo")
                   Text(
-                    'Campo necessario',
-                    style: Theme.of(context).textTheme.displaySmall
+                    'Tipologia ripartitori',
+                    style: Theme.of(context).textTheme.labelSmall
                   ),
-                SizedBox(
-                  height: 20,
-                ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    spacing: 2,
+                    children: [
+                      Checkbox(
+                        value: _riscaldamento,
+                        onChanged: (value) {
+                          setState(() {
+                            _riscaldamento = value ?? false;
+                          });
+                        },
+                        activeColor: CustomColors.iconColor,
+                      ),
+                      Text(
+                        "Riscaldamento"
+                      )
+                    ]
+                  ),
+                  Row(
+                    spacing: 2,
+                    children: [
+                      Checkbox(
+                        value: _raffrescamento,
+                        onChanged: (value) => {
+                          setState(() {
+                            _raffrescamento = value ?? false;
+                          })
+                        },
+                        activeColor: CustomColors.iconColor,
+                      ),
+                      Text(
+                        "Raffrescamento"
+                      )
+                    ]
+                  ),
+                  if(_isNotCompletedCheck)
+                    Text(
+                      'Campo necessario',
+                      style: Theme.of(context).textTheme.displaySmall
+                    ),
+                  SizedBox(
+                    height: 20,
+                  ),
                 Row(
                   children: [
                     Expanded(
@@ -206,52 +227,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                   text: "Vano",
                   controller: _vanoController,
                   required: true,
-                ),
-                CustomTextfield(
-                  text: "Tipologia",
-                  controller: _tipologiaController,
-                  required: true,
-                ),
-                Row(
-                  spacing: 5,
-                  children: [
-                    Expanded(
-                      child: CustomTextfield(
-                        text: "Altezza (cm)",
-                        controller: _altezzaController,
-                        required: true,
-                        textInputType: TextInputType.numberWithOptions(decimal: true),
-
-                      )
-                    ),
-                    Expanded(
-                      child: CustomTextfield(
-                        text: "Larghezza (cm)",
-                        controller: _larghezzaController,
-                        required: true,
-                        textInputType: TextInputType.numberWithOptions(decimal: true),
-                      )
-                    )
-                  ],
-                ),
-                Row(
-                  spacing: 5,
-                  children: [
-                    Expanded(
-                      child: CustomTextfield(
-                        text: "Profodità (cm)",
-                        controller: _profonditaController,
-                        required: true,
-                        textInputType: TextInputType.numberWithOptions(decimal: true),
-
-                      )
-                    ),
-                    Expanded(
-                      child: CustomTextfield(
-                        text: "Numero elementi",
-                        controller: _nElementiController,
-                        required: true,
-                        validator: (value) {
+                  validator: (value) {
                           if(value == null || value.isEmpty){
                             return 'Campo richiesto';
                           }
@@ -261,11 +237,68 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                             return 'Inserire un numero intero';
                           }
                         },
-                        textInputType: TextInputType.number,
-                      )
-                    )
-                  ],
+                  textInputType: TextInputType.number,
                 ),
+                if(_selectedStrumento == "riscaldamento")
+                  CustomTextfield(
+                    text: "Tipologia",
+                    controller: _tipologiaController,
+                    required: true,
+                  ),
+                  Row(
+                    spacing: 5,
+                    children: [
+                      Expanded(
+                        child: CustomTextfield(
+                          text: "Altezza (cm)",
+                          controller: _altezzaController,
+                          required: true,
+                          textInputType: TextInputType.numberWithOptions(decimal: true),
+
+                        )
+                      ),
+                      Expanded(
+                        child: CustomTextfield(
+                          text: "Larghezza (cm)",
+                          controller: _larghezzaController,
+                          required: true,
+                          textInputType: TextInputType.numberWithOptions(decimal: true),
+                        )
+                      )
+                    ],
+                  ),
+                  Row(
+                    spacing: 5,
+                    children: [
+                      Expanded(
+                        child: CustomTextfield(
+                          text: "Profodità (cm)",
+                          controller: _profonditaController,
+                          required: true,
+                          textInputType: TextInputType.numberWithOptions(decimal: true),
+
+                        )
+                      ),
+                      Expanded(
+                        child: CustomTextfield(
+                          text: "Numero elementi",
+                          controller: _nElementiController,
+                          required: true,
+                          validator: (value) {
+                            if(value == null || value.isEmpty){
+                              return 'Campo richiesto';
+                            }
+
+                            final intRegExp = RegExp(r'^[0-9]+$');
+                            if(!intRegExp.hasMatch(value)){
+                              return 'Inserire un numero intero';
+                            }
+                          },
+                          textInputType: TextInputType.number,
+                        )
+                      )
+                    ],
+                  ),
                 Row(
                   children: [
                     Expanded(
@@ -460,8 +493,54 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         });
       }
 
-      
+      if((_riscaldamento || _raffrescamento) && _uploadImage != null){
+        RipartitoriModel ripartitore = RipartitoriModel(
+          matricola: _matricolaController.text,
+          descrizione: _descrizioneController.text,
+          vano: int.parse(_vanoController.text),
+          tipologia: _tipologiaController.text,
+          altezza: double.parse(_altezzaController.text.replaceAll(',', '.')),
+          larghezza: double.parse(_larghezzaController.text.replaceAll(',', '.')),
+          profondita: double.parse(_profonditaController.text.replaceAll(',', '.')),
+          numeroElementi: int.parse(_nElementiController.text.replaceAll(',', '.')),
+          pathImage: _pathUploadImage!
+        );
 
+        switch (_selectedStrumento) {
+          case "Contatore Freddo" :
+            _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+            _appartamento!.raffrescamento!.completato = true;
+            break;
+          case  "Contatore Caldo/Freddo" :
+            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+
+            _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+
+            _appartamento!.riscaldamento!.completato = true;
+            break;
+          case "Contatore Caldo":
+            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+
+            _appartamento!.riscaldamento!.completato = true;
+            break;
+          case "riscaldamento":
+            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            break;
+          case "Contatore Acqua Calda":
+            _appartamento!.acquaCalda!.ripartitori!.add(ripartitore);
+            _appartamento!.acquaCalda!.completato = true;
+            break;
+          case "Contatore Acqua Fredda":
+            _appartamento!.acquaFredda!.ripartitori!.add(ripartitore);
+            _appartamento!.acquaFredda!.completato = true;
+            break;
+        }
+
+        SharedPreferences sp = await SharedPreferences.getInstance();
+        sp.setString('appartamento_temp_$_idAppartamento', jsonEncode(_appartamento!.toJson()));
+
+        print(jsonDecode(sp.getString('appartamento_temp_$_idAppartamento')!));
+      }
 
     }
 

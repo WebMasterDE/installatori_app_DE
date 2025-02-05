@@ -18,7 +18,7 @@ class CondominiProvider extends ChangeNotifier {
 
   Future<List<dynamic>> getStrumentiCondomini(int idAnaCondominio,BuildContext context) async {
     final response =
-        await ApiRequests.sendAuthRequest('condomini/strumenti_condomini/$idAnaCondominio', 'GET', {});
+        await ApiRequests.sendAuthRequest('condominio/$idAnaCondominio/strumenti_condomini', 'GET', {});
     if (response['errore_double_token'] == true) {
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       return List.empty();

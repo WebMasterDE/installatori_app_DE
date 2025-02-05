@@ -2,38 +2,43 @@ class RipartitoriModel {
   String matricola;
   String descrizione;
   int vano;
-  String tipologia;
-  int? altezza;
-  int? larghezza;
-  int? profondita;
+  String? tipologia;
+  double? altezza;
+  double? larghezza;
+  double? profondita;
   int? numeroElementi;
   String pathImage;
-
-  //Aggiungere lista ripartitori (oggetti di tipo Ripartitore)
+  String? note;
 
   RipartitoriModel(
       {required this.matricola,
       required this.descrizione,
       required this.vano,
-      required this.tipologia,
+      this.tipologia,
       this.altezza,
       this.larghezza,
       this.profondita,
       this.numeroElementi,
-      required this.pathImage});
+      required this.pathImage,
+      this.note
+      }
+    );
 
   @override
-  factory RipartitoriModel.fromJson(Map<String, dynamic> json) =>
-      RipartitoriModel(
-          matricola: json['matricola'],
-          descrizione: json['descrizione'],
-          vano: json['vano'],
-          tipologia: json['tipologia'],
-          altezza: json['altezza'],
-          larghezza: json['larghezza'],
-          profondita: json['profondita'],
-          numeroElementi: json['numeroElementi'],
-          pathImage: json['pathImage']);
+  factory RipartitoriModel.fromJson(Map<String, dynamic> json) {
+    return RipartitoriModel(
+        matricola: json['matricola'],
+        descrizione: json['descrizione'],
+        vano: json['vano'],
+        tipologia: json['tipologia'],
+        altezza: json['altezza'],
+        larghezza: json['larghezza'],
+        profondita: json['profondita'],
+        numeroElementi: json['numeroElementi'],
+        pathImage: json['pathImage'],
+        note: json['note']
+      );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -45,7 +50,8 @@ class RipartitoriModel {
       'larghezza': larghezza,
       'profondita': profondita,
       'numeroElementi': numeroElementi,
-      'pathImage': pathImage
+      'pathImage': pathImage,
+      'note': note
     };
   }
 }

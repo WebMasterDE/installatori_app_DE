@@ -9,10 +9,10 @@ class AppartamentoModel {
   String nome;
   String cognome;
   String mail;
-  Map<String, StatoRipartitori> raffrescamento;
-  Map<String, StatoRipartitori> riscaldamento;
-  Map<String, StatoRipartitori> acquaCalda;
-  Map<String, StatoRipartitori> acquaFredda;
+  StatoRipartitori? raffrescamento;
+  StatoRipartitori? riscaldamento;
+  StatoRipartitori? acquaCalda;
+  StatoRipartitori? acquaFredda;
 
   AppartamentoModel({
     this.id,
@@ -23,14 +23,11 @@ class AppartamentoModel {
     required this.nome,
     required this.cognome,
     required this.mail,
-    Map<String, StatoRipartitori>? raffrescamento,
-    Map<String, StatoRipartitori>? riscaldamento,
-    Map<String, StatoRipartitori>? acquaCalda,
-    Map<String, StatoRipartitori>? acquaFredda,
-  })  : raffrescamento = raffrescamento ?? {},
-        riscaldamento = riscaldamento ?? {},
-        acquaCalda = acquaCalda ?? {},
-        acquaFredda = acquaFredda ?? {};
+    StatoRipartitori? raffrescamento,
+    StatoRipartitori? riscaldamento,
+    StatoRipartitori? acquaCalda,
+    StatoRipartitori? acquaFredda,
+  });
 
   factory AppartamentoModel.fromJson(Map<String, dynamic> json) {
     return AppartamentoModel(
@@ -42,22 +39,10 @@ class AppartamentoModel {
       nome: json['nome'],
       cognome: json['cognome'],
       mail: json['mail'],
-      raffrescamento: (json['raffrescamento'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
-          ) ??
-          {},
-      riscaldamento: (json['riscaldamento'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
-          ) ??
-          {},
-      acquaCalda: (json['acquaCalda'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
-          ) ??
-          {},
-      acquaFredda: (json['acquaFredda'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(key, StatoRipartitori.fromJson(value)),
-          ) ??
-          {},
+      raffrescamento: json['raffrescamento'] != null ? StatoRipartitori.fromJson(json['raffrescamento']) : null,
+      riscaldamento: json['riscaldamento'] != null ? StatoRipartitori.fromJson(json['riscaldamento']) : null,
+      acquaCalda: json['acquaCalda'] != null ? StatoRipartitori.fromJson(json['acquaCalda']) : null,
+      acquaFredda: json['acquaFredda'] != null ? StatoRipartitori.fromJson(json['acquaFredda']) : null,
     );
   }
 
@@ -71,38 +56,38 @@ class AppartamentoModel {
       'nome': nome,
       'cognome': cognome,
       'mail': mail,
-      'raffrescamento':
-          raffrescamento.map((key, value) => MapEntry(key, value.toJson())),
-      'riscaldamento':
-          riscaldamento.map((key, value) => MapEntry(key, value.toJson())),
-      'acquaCalda':
-          acquaCalda.map((key, value) => MapEntry(key, value.toJson())),
-      'acquaFredda':
-          acquaFredda.map((key, value) => MapEntry(key, value.toJson())),
+      'raffrescamento': raffrescamento?.toJson(),
+      'riscaldamento': riscaldamento?.toJson(),
+      'acquaCalda': acquaCalda?.toJson(),
+      'acquaFredda': acquaFredda?.toJson()
     };
   }
 }
 
 class StatoRipartitori {
   bool completato;
-  List<RipartitoriModel> ripartitori;
+  List<RipartitoriModel>? ripartitori;
 
-  StatoRipartitori({this.completato = false, required this.ripartitori});
+  StatoRipartitori({this.completato = false, this.ripartitori});
 
   factory StatoRipartitori.fromJson(Map<String, dynamic> json) {
+
+    List<RipartitoriModel> ripartitoriList = [];
+
+    for (var ripartitore in List.from(json['ripartitori'])) {
+      ripartitoriList.add(RipartitoriModel.fromJson(ripartitore));
+    }
+
     return StatoRipartitori(
       completato: json['completato'] ?? false,
-      ripartitori: (json['ripartitori'] as List<dynamic>?)
-              ?.map((e) => RipartitoriModel.fromJson(e))
-              .toList() ??
-          [],
+      ripartitori: ripartitoriList
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'completato': completato,
-      'ripartitori': ripartitori.map((e) => e.toJson()).toList(),
+      'ripartitori': ripartitori != null ? (ripartitori!.map((e) => e.toJson()).toList()) : List.empty(),
     };
   }
 }

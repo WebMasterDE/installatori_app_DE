@@ -329,69 +329,100 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       List<CondominioModel> cmList = [];
 
-      if (condominiList == null) {
-        AppartamentoModel am = AppartamentoModel(
-            interno: _internoController.text,
-            scala: _scalaController.text,
-            piano: int.parse(_pianoController.text),
-            pathUploadImage: _pathUploadImage,
-            nome: _nomeController.text,
-            cognome: _cognomeController.text,
-            mail: _mailController.text);
+      int idAppartamento = 0;
 
-        List<AppartamentoModel> amList = [];
-        amList.add(am);
+      CondominioModel? condominio;
 
-        CondominioModel cm = CondominioModel(
-            idAnaCondominio: _idAnaCondominio, appartamenti: amList);
-
-        cmList.add(cm);
-
-        List<Map<String, dynamic>> cmListString = [];
-
-        cmList.forEach((condominio) {
-          var condominioString = condominio.toJson();
-          cmListString.add(condominioString);
-        });
-
-        sharedPref.setString('condomini', jsonEncode(cmListString));
-      } else {
+      if(condominiList != null){
         List<Map<String, dynamic>> cmListString =
             List.from(jsonDecode(condominiList));
 
-        cmListString.forEach((condominioString) {
-          cmList.add(CondominioModel.fromJson(condominioString));
-        });
+        for(int i = 0; i < cmListString.length; i++){
 
-        cmList.forEach((condominio) {
-          if (condominio.idAnaCondominio == _idAnaCondominio) {
-            AppartamentoModel am = AppartamentoModel(
-                interno: _internoController.text,
-                scala: _scalaController.text,
-                piano: int.parse(_pianoController.text),
-                pathUploadImage: _pathUploadImage,
-                nome: _nomeController.text,
-                cognome: _cognomeController.text,
-                mail: _mailController.text);
+          cmList.add(CondominioModel.fromJson(cmListString[i]));
 
-            condominio.appartamenti!.add(am);
+          CondominioModel c = cmList.last;
+
+          if(c.idAnaCondominio == _idAnaCondominio){
+            condominio = c;
+            List<AppartamentoModel>? appartamenti = c.appartamenti;
+
+            if(appartamenti != null){
+              idAppartamento = appartamenti.last.id! + 1;
+            }
           }
-        });
+        }
+      }
+
+      //Creo entità appartamento
+      AppartamentoModel am = AppartamentoModel(
+        id: idAppartamento,
+        interno: _internoController.text,
+        scala: _scalaController.text,
+        piano: int.parse(_pianoController.text),
+        pathUploadImage: _pathUploadImage,
+        nome: _nomeController.text,
+        cognome: _cognomeController.text,
+        mail: _mailController.text);
+
+      int? idAppartamentoFrom = sharedPref.getInt('id_appartamento_from');
+
+      if(idAppartamentoFrom == null){
+        
+        if (condominiList == null || condominio == null) {
+          
+
+          List<AppartamentoModel> amList = [];
+          amList.add(am);
+
+          CondominioModel cm = CondominioModel(
+              idAnaCondominio: _idAnaCondominio, appartamenti: amList);
+
+          cmList.add(cm);
+
+        } else {
+
+          if(condominio.appartamenti != null){
+            condominio.appartamenti!.add(am);
+          }else{
+            List<AppartamentoModel> amList = [];
+            amList.add(am);
+
+            condominio.appartamenti = amList;
+          }
+        }
+      }else{
+        List<AppartamentoModel> appartamenti = condominio!.appartamenti!;
+
+        for(var appartamento in appartamenti){
+          if(appartamento.id == idAppartamentoFrom){
+            appartamento = am;
+          }
+        }
       }
 
       List<Map<String, dynamic>> cmListString = [];
 
-      cmList.forEach((condominio) {
+      for (var condominio in cmList) {
         var condominioString = condominio.toJson();
         cmListString.add(condominioString);
-      });
+      }
 
       sharedPref.setString('condomini', jsonEncode(cmListString));
+
+      sharedPref.setString('appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
+
+      print('condominio ${jsonDecode(sharedPref.getString('condomini')!)}');
+      print('appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
+
+      sharedPref.remove('id_appartamento_from');
+
       Navigator.pushNamed(context, "/selezione_strumenti",
-          arguments:  SelezioneStrumentiPageArgs(data: {
-            'id': _idAnaCondominio,
-            'interno': _internoController.text,
-          }));
+        arguments:  SelezioneStrumentiPageArgs(data: {
+          'id': _idAnaCondominio,
+          'idAppartamento': idAppartamento
+        }));
+
     }
   }
 }
