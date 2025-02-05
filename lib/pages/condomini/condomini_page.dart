@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:installatori_de/components/stepper.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -26,7 +27,7 @@ class _CondominiPageState extends State<CondominiPage> {
 
   Future<void> _fetchCondomini(BuildContext context) async {
     final CondominiProvider condominiProvider = CondominiProvider();
-    _condominiList = condominiProvider.get_ticket_condomini(context);
+    _condominiList = condominiProvider.getTicketCondomini(context);
   }
 
   Future<bool> logout() {
@@ -59,8 +60,7 @@ class _CondominiPageState extends State<CondominiPage> {
                                   backgroundColor:
                                       Color.fromRGBO(154, 247, 155, 1)),
                               child: Text('Annulla',
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall),
+                                  style: Theme.of(context).textTheme.labelSmall),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -78,8 +78,7 @@ class _CondominiPageState extends State<CondominiPage> {
                                   backgroundColor:
                                       const Color.fromARGB(255, 255, 0, 0)),
                               child: Text('Esci',
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall),
+                                  style: Theme.of(context).textTheme.labelSmall),
                             ),
                           ],
                           backgroundColor: CustomColors.iconColor,
@@ -101,6 +100,9 @@ class _CondominiPageState extends State<CondominiPage> {
               'Condomini',
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.left,
+            ),
+                        SizedBox(
+              height: 20,
             ),
             SizedBox(
               height: 20,

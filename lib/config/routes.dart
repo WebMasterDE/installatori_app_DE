@@ -4,16 +4,14 @@ import 'package:installatori_de/pages/appartamenti/new_appartamento_page.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/condomini/condomini_page.dart';
 import 'package:installatori_de/pages/login/login_page.dart';
+import 'package:installatori_de/pages/appartamenti/selezione_strumenti_page.dart';
 
-
-class Routes{
-
+class Routes {
   RouteSettings settings;
 
   Routes(this.settings);
 
-  dynamic getRoute(){
-
+  dynamic getRoute() {
     return {
       LoginPage.route: (_) => const LoginPage(),
       CondominiPage.route: (_) => const CondominiPage(),
@@ -25,9 +23,10 @@ class Routes{
       ),
       NewStrumentoPage.route: (_) => NewStrumentoPage(
         arguments: settings.arguments as NewStrumentoPageArgs,
+      ),
+      SelezioneStrumentiPage.route: (_) => SelezioneStrumentiPage(
+        arguments: settings.arguments as SelezioneStrumentiPageArgs,
       )
     };
-
   }
-
 }
