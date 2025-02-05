@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextfield extends StatelessWidget {
 
@@ -6,13 +7,15 @@ class CustomTextfield extends StatelessWidget {
   final TextEditingController? controller;
   final bool required;
   final String? Function(String?)? validator;
+  final TextInputType? textInputType;
 
   const CustomTextfield({
     super.key,
     required this.text,
     this.controller,
     this.required = false,
-    this.validator
+    this.validator,
+    this.textInputType = TextInputType.text,
   });
 
   @override
@@ -46,13 +49,19 @@ class CustomTextfield extends StatelessWidget {
         SizedBox(
           height: 7,
         ),
-        TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: text,
-            border: OutlineInputBorder(),
-          ),
-          validator: validatorFunction,
+        Stack(
+          children: [
+            TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: text,
+                border: OutlineInputBorder(),
+                errorStyle: Theme.of(context).textTheme.displaySmall,
+              ),
+              validator: validatorFunction,
+              keyboardType: textInputType,
+            ),
+          ],
         ),
         SizedBox(
           height: 10,

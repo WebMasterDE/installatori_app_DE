@@ -4,7 +4,7 @@ import 'package:installatori_de/utils/api_requests.dart';
 class CondominiProvider extends ChangeNotifier {
   Future<List<dynamic>> get_ticket_condomini(BuildContext context) async {
     final response =
-        await ApiRequests.sendAuthRequest('ticket_condomini', 'GET', {});
+        await ApiRequests.sendAuthRequest('condomini/ticket_condomini', 'GET', {});
     if (response['errore_double_token'] == true) {
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       return List.empty();

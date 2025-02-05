@@ -15,40 +15,51 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 
 
-class NewAppartamentoPage extends StatefulWidget {
+class NewStrumentoPage extends StatefulWidget {
 
-  static const route = '/newAppartamento';
+  static const route = '/newStrumento';
 
-  final NewAppartamentoPageArgs arguments;
+  final NewStrumentoPageArgs arguments;
 
 
-  const NewAppartamentoPage({
+  const NewStrumentoPage({
     super.key,
     required this.arguments
     });
 
   @override
-  State<NewAppartamentoPage> createState() => _NewAppartamentoPageState();
+  State<NewStrumentoPage> createState() => _NewStrumentoPageState();
 }
 
-class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
+class _NewStrumentoPageState extends State<NewStrumentoPage> {
+
+  bool _riscaldamento = false;
+  bool _raffrescamento = false;
 
   File? _uploadImage;
   String? _pathUploadImage;
   int _idAnaCondominio = 0;
 
-  final TextEditingController _internoController = TextEditingController();
-  final TextEditingController _scalaController = TextEditingController();
-  final TextEditingController _pianoController = TextEditingController();
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _cognomeController = TextEditingController();
-  final TextEditingController _mailController = TextEditingController();
+  final TextEditingController _matricolaController = TextEditingController();
+  final TextEditingController _descrizioneController = TextEditingController();
+  final TextEditingController _vanoController = TextEditingController();
+  final TextEditingController _tipologiaController = TextEditingController();
+  final TextEditingController _altezzaController = TextEditingController();
+  final TextEditingController _larghezzaController = TextEditingController();
+  final TextEditingController _profonditaController = TextEditingController();
+  final TextEditingController _nElementiController = TextEditingController();
+
+  bool _isNotCompletedCheck = false;
+  bool _isNotCompletedImage = false;
 
 
   final _formKey = GlobalKey<FormState>();
+
+  String matricolaString = '';
 
 
    @override
@@ -61,6 +72,7 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -84,10 +96,59 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
                   height: 20,
                 ),
                 Text(
-                  'Dati appartamento',
+                  'Dati ripartitori',
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.left,
                 ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  'Tipologia ripartitori',
+                  style: Theme.of(context).textTheme.labelSmall
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  spacing: 2,
+                  children: [
+                    Checkbox(
+                      value: _riscaldamento,
+                      onChanged: (value) {
+                        setState(() {
+                          _riscaldamento = value ?? false;
+                        });
+                      },
+                      activeColor: CustomColors.iconColor,
+                    ),
+                    Text(
+                      "Riscaldamento"
+                    )
+                  ]
+                ),
+                Row(
+                  spacing: 2,
+                  children: [
+                    Checkbox(
+                      value: _raffrescamento,
+                      onChanged: (value) => {
+                        setState(() {
+                          _raffrescamento = value ?? false;
+                        })
+                      },
+                      activeColor: CustomColors.iconColor,
+                    ),
+                    Text(
+                      "Raffrescamento"
+                    )
+                  ]
+                ),
+                if(_isNotCompletedCheck)
+                  Text(
+                    'Campo necessario',
+                    style: Theme.of(context).textTheme.displaySmall
+                  ),
                 SizedBox(
                   height: 20,
                 ),
@@ -95,34 +156,101 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
                   children: [
                     Expanded(
                       child: CustomTextfield(
-                        text: 'Iterno',
-                        controller: _internoController,
-                        required: true
-                      )
+                        text: 'Matricola',
+                        controller: _matricolaController,
+                        required: true,
+                      ),
                     ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: CustomTextfield(
-                        text: 'Scala',
-                        controller: _scalaController,
-                        required: true
-                      )
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 22,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.camera_alt,
+                            color: CustomColors.iconColor, 
+                          ),
+                          onPressed: () async {
+
+
+                          String? res = await SimpleBarcodeScanner.scanBarcode(
+                                            context,
+                                            barcodeAppBar: const BarcodeAppBar(
+                                              appBarTitle: 'Test',
+                                              centerTitle: false,
+                                              enableBackButton: true,
+                                              backButtonIcon: Icon(Icons.arrow_back_ios),
+                                            ),
+                                            isShowFlashIcon: true,
+                                            delayMillis: 1000,
+                                            cameraFace: CameraFace.back,
+                                          );
+                                          setState(() {
+                                            _matricolaController.text = res as String;
+                                          });
+                                        },                                 
+                              
+                          alignment: Alignment.center,
+                        ),
+                      ]
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 10,
+                CustomTextfield(
+                  text: "Descrizione",
+                  controller: _descrizioneController,
+                  required: true
+                ),
+                CustomTextfield(
+                  text: "Vano",
+                  controller: _vanoController,
+                  required: true,
+                ),
+                CustomTextfield(
+                  text: "Tipologia",
+                  controller: _tipologiaController,
+                  required: true,
                 ),
                 Row(
+                  spacing: 5,
                   children: [
                     Expanded(
                       child: CustomTextfield(
-                        text: 'Piano',
-                        controller: _pianoController,
+                        text: "Altezza (cm)",
+                        controller: _altezzaController,
                         required: true,
-                        textInputType: TextInputType.number,
+                        textInputType: TextInputType.numberWithOptions(decimal: true),
+
+                      )
+                    ),
+                    Expanded(
+                      child: CustomTextfield(
+                        text: "Larghezza (cm)",
+                        controller: _larghezzaController,
+                        required: true,
+                        textInputType: TextInputType.numberWithOptions(decimal: true),
+                      )
+                    )
+                  ],
+                ),
+                Row(
+                  spacing: 5,
+                  children: [
+                    Expanded(
+                      child: CustomTextfield(
+                        text: "Profodità (cm)",
+                        controller: _profonditaController,
+                        required: true,
+                        textInputType: TextInputType.numberWithOptions(decimal: true),
+
+                      )
+                    ),
+                    Expanded(
+                      child: CustomTextfield(
+                        text: "Numero elementi",
+                        controller: _nElementiController,
+                        required: true,
                         validator: (value) {
                           if(value == null || value.isEmpty){
                             return 'Campo richiesto';
@@ -133,25 +261,16 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
                             return 'Inserire un numero intero';
                           }
                         },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: SizedBox()
+                        textInputType: TextInputType.number,
+                      )
                     )
-                    
                   ],
-                ),
-                SizedBox(
-                  height: 20,
                 ),
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        'Foto campanello',
+                        'Foto termosifone',
                         style: Theme.of(context).textTheme.titleMedium,
                         textAlign: TextAlign.left,
                       ),
@@ -220,45 +339,14 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
                       ),
                     ),
                   ),
+                if(_isNotCompletedImage)
+                  Text(
+                    'Campo necessario',
+                    style: Theme.of(context).textTheme.displaySmall
+                  ),
                 SizedBox(
                   height: 20,
                 ),
-                Text(
-                  'Dati inquilino',
-                  style: Theme.of(context).textTheme.titleMedium            
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                CustomTextfield(
-                  text: 'Nome',
-                  controller: _nomeController,
-                  required: true
-                ),
-                CustomTextfield(
-                  text: 'Cognome',
-                  controller: _cognomeController,
-                  required: true
-                ),
-                CustomTextfield(
-                  text: 'Email',
-                  controller: _mailController,
-                  required: true,
-                  validator: (value) {
-                    if(_mailController.text.isEmpty){
-                      return 'Campo richiesto';
-                    }
-
-                    if(!EmailValidator.validate(_mailController.text.trim())){
-                      return 'Email nel formato non valido';
-                    }
-
-                    return null;
-                  },
-                ),
-                SizedBox(
-                  height: 10,
-                )
               ],
             ),
           ),
@@ -351,87 +439,39 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
   void _stepSucc() async {
 
     if(_formKey.currentState!.validate()){
-      final sharedPref = await SharedPreferences.getInstance();
 
-      var condominiList = sharedPref.getString('condomini');
-
-      List<CondominioModel> cmList = [];
-
-      if(condominiList == null){
-
-        AppartamentoModel am = AppartamentoModel(
-          interno: _internoController.text,
-          scala: _scalaController.text,
-          piano: int.parse(_pianoController.text),
-          pathUploadImage: _pathUploadImage,
-          nome: _nomeController.text,
-          cognome: _cognomeController.text,
-          mail: _mailController.text
-        );
-
-        List<AppartamentoModel> amList = [];
-        amList.add(am);
-
-        CondominioModel cm = CondominioModel(
-          idAnaCondominio: _idAnaCondominio,
-          appartamenti: amList
-        );
-
-        cmList.add(cm);
-
-        List<Map<String, dynamic>> cmListString = [];
-
-        cmList.forEach((condominio) {
-          var condominioString = condominio.toJson();
-          cmListString.add(condominioString);
+      if(_riscaldamento || _raffrescamento){
+        setState(() {
+          _isNotCompletedCheck = false;
         });
-
-        sharedPref.setString('condomini', jsonEncode(cmListString));
-
       }else{
-
-        List<Map<String, dynamic>> cmListString = List.from(jsonDecode(condominiList));
-
-        cmListString.forEach((condominioString) {
-          cmList.add(CondominioModel.fromJson(condominioString));
+        setState(() {
+          _isNotCompletedCheck = true;
         });
-
-        cmList.forEach((condominio){
-          if(condominio.idAnaCondominio == _idAnaCondominio){
-
-            AppartamentoModel am = AppartamentoModel(
-              interno: _internoController.text,
-              scala: _scalaController.text,
-              piano: int.parse(_pianoController.text),
-              pathUploadImage: _pathUploadImage,
-              nome: _nomeController.text,
-              cognome: _cognomeController.text,
-              mail: _mailController.text
-            );
-
-            condominio.appartamenti!.add(am);
-          }
-        });
-
       }
 
-      List<Map<String, dynamic>> cmListString = [];
+      if(_uploadImage == null){
+        setState(() {
+          _isNotCompletedImage = true;
+        });
+      }else{
+        setState(() {
+          _isNotCompletedImage = false;
+        });
+      }
 
-      cmList.forEach((condominio) {
-        var condominioString = condominio.toJson();
-        cmListString.add(condominioString);
-      });
+      
 
-      sharedPref.setString('condomini', jsonEncode(cmListString));
+
     }
 
   }
 
 }
 
-class NewAppartamentoPageArgs {
+class NewStrumentoPageArgs {
   final dynamic data;
 
-  NewAppartamentoPageArgs({required this.data});
+  NewStrumentoPageArgs({required this.data});
 }
 
