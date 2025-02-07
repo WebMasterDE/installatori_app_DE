@@ -23,22 +23,18 @@ class RipartitoriModel {
       this.note
       }
     );
+   RipartitoriModel.fromJson(Map<String, dynamic> json)
+       : matricola = json['matricola'],
+         descrizione = json['descrizione'],
+         vano = json['vano'],
+         pathImage = json['pathImage'],
+         tipologia = json['tipologia'],
+         altezza = json['altezza'],
+         larghezza = json['larghezza'],
+         profondita = json['profondita'],
+         numeroElementi = json['numeroElementi'],
+         note = json['note'];
 
-  @override
-  factory RipartitoriModel.fromJson(Map<String, dynamic> json) {
-    return RipartitoriModel(
-        matricola: json['matricola'],
-        descrizione: json['descrizione'],
-        vano: json['vano'],
-        tipologia: json['tipologia'],
-        altezza: json['altezza'],
-        larghezza: json['larghezza'],
-        profondita: json['profondita'],
-        numeroElementi: json['numeroElementi'],
-        pathImage: json['pathImage'],
-        note: json['note']
-      );
-  }
 
   Map<String, dynamic> toJson() {
     return {

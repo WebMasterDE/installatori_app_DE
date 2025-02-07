@@ -2,13 +2,15 @@ import 'package:installatori_de/models/ripartitori_model.dart';
 
 class AppartamentoModel {
   int? id;
-  String interno;
-  int piano;
-  String scala;
+  late String interno;
+  late int piano;
+  late String scala;
   String? pathUploadImage;
-  String nome;
-  String cognome;
-  String mail;
+  late String nome;
+  late String cognome;
+  late String mail;
+  int? numeroRipartitoriRiscaldamento; //viene inserito a 1 in caso di contatori diretti
+  String? note;
   StatoRipartitori? raffrescamento;
   StatoRipartitori? riscaldamento;
   StatoRipartitori? acquaCalda;
@@ -23,28 +25,32 @@ class AppartamentoModel {
     required this.nome,
     required this.cognome,
     required this.mail,
+    this.note,
+    required this.numeroRipartitoriRiscaldamento,
     StatoRipartitori? raffrescamento,
     StatoRipartitori? riscaldamento,
     StatoRipartitori? acquaCalda,
     StatoRipartitori? acquaFredda,
   });
 
-  factory AppartamentoModel.fromJson(Map<String, dynamic> json) {
-    return AppartamentoModel(
-      id: json['id'],
-      interno: json['interno'],
-      piano: json['piano'],
-      scala: json['scala'],
-      pathUploadImage: json['pathUploadImage'],
-      nome: json['nome'],
-      cognome: json['cognome'],
-      mail: json['mail'],
-      raffrescamento: json['raffrescamento'] != null ? StatoRipartitori.fromJson(json['raffrescamento']) : null,
-      riscaldamento: json['riscaldamento'] != null ? StatoRipartitori.fromJson(json['riscaldamento']) : null,
-      acquaCalda: json['acquaCalda'] != null ? StatoRipartitori.fromJson(json['acquaCalda']) : null,
-      acquaFredda: json['acquaFredda'] != null ? StatoRipartitori.fromJson(json['acquaFredda']) : null,
-    );
+  AppartamentoModel.fromJson(Map<String, dynamic> json) {
+    print("JSON data: $json");
+      id= json['id'];
+      interno= json['interno'];
+      piano= json['piano'];
+      scala= json['scala'];
+      pathUploadImage= json['pathUploadImage'];
+      nome= json['nome'];
+      cognome= json['cognome'];
+      mail= json['mail'];
+      note= json['note'];
+      numeroRipartitoriRiscaldamento = json['numeroRipartitoriRiscaldamento'];
+      raffrescamento= json['raffrescamento'] != null ? StatoRipartitori.fromJson(json['raffrescamento']) : null;
+      riscaldamento= json['riscaldamento'] != null ? StatoRipartitori.fromJson(json['riscaldamento']) : null;
+      acquaCalda= json['acquaCalda'] != null ? StatoRipartitori.fromJson(json['acquaCalda']) : null;
+      acquaFredda= json['acquaFredda'] != null ? StatoRipartitori.fromJson(json['acquaFredda']) : null;
   }
+  
 
   Map<String, dynamic> toJson() {
     return {
@@ -56,6 +62,8 @@ class AppartamentoModel {
       'nome': nome,
       'cognome': cognome,
       'mail': mail,
+      'note': note,
+      'numeroRipartitoriRiscaldamento': numeroRipartitoriRiscaldamento,
       'raffrescamento': raffrescamento?.toJson(),
       'riscaldamento': riscaldamento?.toJson(),
       'acquaCalda': acquaCalda?.toJson(),
@@ -65,12 +73,12 @@ class AppartamentoModel {
 }
 
 class StatoRipartitori {
-  bool completato;
+  late bool completato;
   List<RipartitoriModel>? ripartitori;
 
   StatoRipartitori({this.completato = false, this.ripartitori});
 
-  factory StatoRipartitori.fromJson(Map<String, dynamic> json) {
+  StatoRipartitori.fromJson(Map<String, dynamic> json) {
 
     List<RipartitoriModel> ripartitoriList = [];
 
@@ -78,10 +86,8 @@ class StatoRipartitori {
       ripartitoriList.add(RipartitoriModel.fromJson(ripartitore));
     }
 
-    return StatoRipartitori(
-      completato: json['completato'] ?? false,
-      ripartitori: ripartitoriList
-    );
+      completato= json['completato'] ?? false;
+      ripartitori= ripartitoriList;
   }
 
   Map<String, dynamic> toJson() {

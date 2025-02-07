@@ -58,82 +58,75 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
             'Nuovo Appartamento',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-        centerTitle: true,
-        backgroundColor: CustomColors.secondaryBackground,
-        scrolledUnderElevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Dati appartamento',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.left,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextfield(
-                        text: 'Iterno',
-                        controller: _internoController,
-                        required: true
-                      )
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: CustomTextfield(
-                        text: 'Scala',
-                        controller: _scalaController,
-                        required: true
-                      )
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextfield(
-                        text: 'Piano',
-                        controller: _pianoController,
-                        required: true,
-                        textInputType: TextInputType.number,
-                        validator: (value) {
-                          if(value == null || value.isEmpty){
-                            return 'Campo richiesto';
-                          }
-
-                          final intRegExp = RegExp(r'^[0-9]+$');
-                          if(!intRegExp.hasMatch(value)){
-                            return 'Inserire un numero intero';
-                          }
-                        },
+          centerTitle: true,
+          backgroundColor: CustomColors.secondaryBackground,
+          scrolledUnderElevation: 0,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Dati appartamento',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.left,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: CustomTextfield(
+                              text: 'Interno',
+                              controller: _internoController,
+                              required: true)),
+                      SizedBox(
+                        width: 20,
                       ),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: SizedBox()
-                    )
-                    
-                  ],
-                ),
+                      Expanded(
+                          child: CustomTextfield(
+                              text: 'Scala',
+                              controller: _scalaController,
+                              required: true)),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextfield(
+                          text: 'Piano',
+                          controller: _pianoController,
+                          required: true,
+                          textInputType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Campo richiesto';
+                            }
+
+                            final intRegExp = RegExp(r'^[0-9]+$');
+                            if (!intRegExp.hasMatch(value)) {
+                              return 'Inserire un numero intero';
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Expanded(child: SizedBox())
+                    ],
+                  ),
                   SizedBox(
                     height: 20,
                   ),
@@ -333,21 +326,20 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       CondominioModel? condominio;
 
-      if(condominiList != null){
+      if (condominiList != null) {
         List<Map<String, dynamic>> cmListString =
             List.from(jsonDecode(condominiList));
 
-        for(int i = 0; i < cmListString.length; i++){
-
+        for (int i = 0; i < cmListString.length; i++) {
           cmList.add(CondominioModel.fromJson(cmListString[i]));
 
           CondominioModel c = cmList.last;
 
-          if(c.idAnaCondominio == _idAnaCondominio){
+          if (c.idAnaCondominio == _idAnaCondominio) {
             condominio = c;
             List<AppartamentoModel>? appartamenti = c.appartamenti;
 
-            if(appartamenti != null){
+            if (appartamenti != null) {
               idAppartamento = appartamenti.last.id! + 1;
             }
           }
@@ -356,22 +348,21 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       //Creo entità appartamento
       AppartamentoModel am = AppartamentoModel(
-        id: idAppartamento,
-        interno: _internoController.text,
-        scala: _scalaController.text,
-        piano: int.parse(_pianoController.text),
-        pathUploadImage: _pathUploadImage,
-        nome: _nomeController.text,
-        cognome: _cognomeController.text,
-        mail: _mailController.text);
+          id: idAppartamento,
+          interno: _internoController.text,
+          scala: _scalaController.text,
+          piano: int.parse(_pianoController.text),
+          pathUploadImage: _pathUploadImage,
+          nome: _nomeController.text,
+          cognome: _cognomeController.text,
+          mail: _mailController.text,
+          numeroRipartitoriRiscaldamento: 1,
+      );
 
       int? idAppartamentoFrom = sharedPref.getInt('id_appartamento_from');
 
-      if(idAppartamentoFrom == null){
-        
+      if (idAppartamentoFrom == null) {
         if (condominiList == null || condominio == null) {
-          
-
           List<AppartamentoModel> amList = [];
           amList.add(am);
 
@@ -379,23 +370,21 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
               idAnaCondominio: _idAnaCondominio, appartamenti: amList);
 
           cmList.add(cm);
-
         } else {
-
-          if(condominio.appartamenti != null){
+          if (condominio.appartamenti != null) {
             condominio.appartamenti!.add(am);
-          }else{
+          } else {
             List<AppartamentoModel> amList = [];
             amList.add(am);
 
             condominio.appartamenti = amList;
           }
         }
-      }else{
+      } else {
         List<AppartamentoModel> appartamenti = condominio!.appartamenti!;
 
-        for(var appartamento in appartamenti){
-          if(appartamento.id == idAppartamentoFrom){
+        for (var appartamento in appartamenti) {
+          if (appartamento.id == idAppartamentoFrom) {
             appartamento = am;
           }
         }
@@ -410,19 +399,20 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       sharedPref.setString('condomini', jsonEncode(cmListString));
 
-      sharedPref.setString('appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
+      sharedPref.setString(
+          'appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
 
       print('condominio ${jsonDecode(sharedPref.getString('condomini')!)}');
-      print('appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
+      print(
+          'appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
 
       sharedPref.remove('id_appartamento_from');
 
       Navigator.pushNamed(context, "/selezione_strumenti",
-        arguments:  SelezioneStrumentiPageArgs(data: {
-          'id': _idAnaCondominio,
-          'idAppartamento': idAppartamento
-        }));
-
+          arguments: SelezioneStrumentiPageArgs(data: {
+            'id': _idAnaCondominio,
+            'idAppartamento': idAppartamento
+          }));
     }
   }
 }
