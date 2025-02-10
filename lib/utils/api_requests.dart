@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiRequests {
-  static const String BASE_URL = 'http://192.168.22.182:8443/api/';
+  static const String BASE_URL = 'http://192.168.61.182:8443/api/';
   static bool _isRefreshing = false;
 
   static Future<dynamic> sendRequest(
@@ -15,7 +15,7 @@ class ApiRequests {
         response = await http.get(Uri.parse(BASE_URL + url), headers: headers);
       } else if (method == 'POST') {
         response = await http.post(Uri.parse(BASE_URL + url),
-            body: body, headers: headers);
+            body: jsonEncode(body), headers: headers);
       } else if (method == 'PUT') {
         response = await http.put(Uri.parse(BASE_URL + url),
             body: body, headers: headers);
@@ -70,7 +70,10 @@ class ApiRequests {
         return null;
       }
 
-      final Map<String, String> headers = {'Authorization': 'Bearer $token'};
+      final Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      };
 
       final response = await sendRequest(url, method, body, headers: headers);
 

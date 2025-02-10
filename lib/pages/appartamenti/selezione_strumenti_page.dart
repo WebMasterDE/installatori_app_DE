@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
@@ -100,25 +99,78 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                   } else if (snapshot.hasData) {
                     listViewChildren.addAll(snapshot.data!.map((strumento) {
                       int index = snapshot.data!.indexOf(strumento);
+                      bool isDisabled = false;
+                      if (_appartamento != null) {
+                        switch (strumento['nome_servizio']) {
+                          case "Contatore Freddo":
+                            if (_appartamento!.riscaldamento != null) {
+                              isDisabled =
+                                  _appartamento!.raffrescamento!.completato;
+                            }
+                            break;
+                          case "Contatore Caldo/Freddo":
+                            if (_appartamento!.riscaldamento != null &&
+                                _appartamento!.raffrescamento != null) {
+                              isDisabled =
+                                  _appartamento!.riscaldamento!.completato &&
+                                      _appartamento!.raffrescamento!.completato;
+                            }
+                            break;
+                          case "Contatore Caldo":
+                            if (_appartamento!.riscaldamento != null) {
+                              isDisabled =
+                                  _appartamento!.riscaldamento!.completato;
+                            }
+                            break;
+                          case "Ripartitori Riscaldamento":
+                            if (_appartamento!.riscaldamento != null) {
+                              isDisabled =
+                                  _appartamento!.riscaldamento!.completato;
+                              break;
+                            }
+                          case "Contatore Acqua Calda":
+                            if (_appartamento!.acquaCalda != null) {
+                              isDisabled =
+                                  _appartamento!.acquaCalda!.completato;
+                            }
+                            break;
+                          case "Contatore Acqua Fredda":
+                            if (_appartamento!.acquaFredda != null) {
+                              isDisabled =
+                                  _appartamento!.acquaFredda!.completato;
+                            }
+                            break;
+                        }
+                      }
+                      String nomeServizio = strumento['nome_servizio'];
+
+                      Color cardColor = isDisabled
+                          ? Colors.grey
+                          : (_selectedIndex == index
+                              ? const Color.fromARGB(255, 253, 192, 99)
+                              : Colors.white);
+
+                      IconData iconData;
+                      if (nomeServizio == "Ripartitori Riscaldamento") {
+                        iconData = HeroiconsSolid.fire;
+                      } else {
+                        iconData = HeroiconsSolid.wrenchScrewdriver;
+                      }
 
                       return Card(
-                        color: _selectedIndex == index
-                            ? const Color.fromARGB(255, 253, 192, 99)
-                            : Colors.white,
+                        color: cardColor,
                         child: ListTile(
-                          leading: strumento['nome_servizio'] ==
-                                  "Ripartitori Riscaldamento"
-                              ? Icon(HeroiconsSolid.fire,
-                                  color: CustomColors.iconColor)
-                              : Icon(HeroiconsSolid.wrenchScrewdriver,
-                                  color: CustomColors.iconColor),
-                          title: Text('${strumento['nome_servizio']}'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = index;
-                              _selectedStrumento = strumento['nome_servizio'];
-                            });
-                          },
+                          leading:
+                              Icon(iconData, color: CustomColors.iconColor),
+                          title: Text(nomeServizio),
+                          onTap: isDisabled
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _selectedIndex = index;
+                                    _selectedStrumento = nomeServizio;
+                                  });
+                                },
                         ),
                       );
                     }).toList());
@@ -187,6 +239,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
   }
 
   void _stepSucc() async {
+    print(_appartamento);
     if (_selectedIndex != -1 && _appartamento != null) {
       if (_selectedStrumento == "Ripartitori Riscaldamento" &&
           _numeroRipartitoriController.text.isEmpty) {
@@ -231,7 +284,8 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
       sharedPref.setString('appartamento_temp_$_idAppartamento',
           jsonEncode(_appartamento!.toJson()));
 
-      print(jsonDecode(sharedPref.getString('appartamento_temp_$_idAppartamento')!));
+      print(jsonDecode(
+          sharedPref.getString('appartamento_temp_$_idAppartamento')!));
 
       Navigator.pushNamed(context, "/newStrumento",
           arguments: NewStrumentoPageArgs(data: {

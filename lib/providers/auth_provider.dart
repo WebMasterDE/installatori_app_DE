@@ -46,7 +46,6 @@ class AuthProvider extends ChangeNotifier {
     // prefs.remove('role');
     // prefs.remove('resfreshToken');
 
-
     if (token.isEmpty) {
       return false;
     }

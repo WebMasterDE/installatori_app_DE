@@ -46,7 +46,6 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? ap = sp.getString('appartamento_temp_$_idAppartamento');
 
-    print("test ${jsonEncode(ap)}");
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
@@ -69,13 +68,9 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? ap = sp.getString('appartamento_temp_$_idAppartamento');
 
-    print("test ${jsonEncode(ap)}");
-
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
     }
-
-    print(jsonEncode(_appartamento));
   }
 
   @override
@@ -202,14 +197,7 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
               'selectedStrumento': _selectedStrumento,
             }));
       }
-    } else if (_selectedStrumento == "Contatore Freddo" ||
-        _selectedStrumento == "Contatore Caldo/Freddo" ||
-        _selectedStrumento == "Contatore Caldo" ||
-        _selectedStrumento == "Contatore Acqua Calda" ||
-        _selectedStrumento == "Contatore Acqua Fredda") {
-      if (_appartamento!.raffrescamento!.completato ||
-          _appartamento!.acquaCalda!.completato ||
-          _appartamento!.acquaFredda!.completato) {
+    } else if (_selectedStrumento == "Contatore Freddo" || _selectedStrumento == "Contatore Caldo/Freddo" || _selectedStrumento == "Contatore Caldo" || _selectedStrumento == "Contatore Acqua Calda" || _selectedStrumento == "Contatore Acqua Fredda") {
         Navigator.pushNamed(context, "/nota_appartamento",
             arguments: NotaAppartamentoPageArgs(data: {
               'id': _idAnaCondominio,
@@ -217,7 +205,6 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
             }));
       }
     }
-  }
 }
 
 class RecapRipartitoriPageArgs {

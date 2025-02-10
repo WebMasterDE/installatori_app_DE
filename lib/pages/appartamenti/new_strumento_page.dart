@@ -71,13 +71,9 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? ap = sp.getString('appartamento_temp_$_idAppartamento');
 
-    print("test ${jsonEncode(ap)}");
-
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
     }
-
-    print(jsonEncode(_appartamento));
   }
 
   @override
@@ -117,7 +113,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                           textAlign: TextAlign.left,
                         ),
                         SizedBox(
-                          height: 20,
+                          height: 10,
                         ),
                         if (_selectedStrumento == "Contatore Caldo/Freddo")
                           Text('Tipologia ripartitori',
@@ -437,15 +433,16 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
-      if (_riscaldamento || _raffrescamento) {
-        setState(() {
-          _isNotCompletedCheck = false;
-        });
-      } else {
-        setState(() {
-          _isNotCompletedCheck = true;
-        });
-      }
+        if (_riscaldamento || _raffrescamento) {
+          setState(() {
+            _isNotCompletedCheck = false;
+          });
+        } else {
+          setState(() {
+            _isNotCompletedCheck = true;
+          });
+        }
+      
 
       if (_uploadImage == null) {
         setState(() {
@@ -485,6 +482,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
 
             _appartamento!.riscaldamento!.completato = true;
+            _appartamento!.raffrescamento!.completato = true;
             break;
           case "Contatore Caldo":
             _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
