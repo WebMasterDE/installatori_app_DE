@@ -291,7 +291,9 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
           arguments: NewStrumentoPageArgs(data: {
             'id': _idAnaCondominio,
             'idAppartamento': _idAppartamento,
-            'selectedStrumento': _selectedStrumento
+            'selectedStrumento': _selectedStrumento,
+            'modifica': false,
+            'matricola_modifica': ''
           }));
     }
   }

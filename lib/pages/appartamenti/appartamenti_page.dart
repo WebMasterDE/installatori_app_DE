@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/components/custom_button.dart';
+import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/condominio_model.dart';
+import 'package:installatori_de/pages/appartamenti/pagina_modifica.dart';
 import 'package:installatori_de/providers/appartamenti_provider.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -25,8 +27,12 @@ class AppartamentiPage extends StatefulWidget {
 class _AppartamentiPageState extends State<AppartamentiPage> {
   late Future<List<dynamic>> appartamenti;
 
+  List<dynamic> appartamentiSp = [];
+
   int _idAnaCondominio = 0;
   String _nomeCondominio = '';
+
+  AppartamentoModel? _appartamento_;
 
   @override
   void initState() {
@@ -36,6 +42,19 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
     _nomeCondominio = widget.arguments.data['nome'];
 
     appartamenti = AppartamentiProvider().getAppartamenti(_idAnaCondominio);
+  }
+
+  void getAppartamento() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    int id = 0;
+    while (!sp.containsKey('appartamento_temp_$id')) {
+      String? ap = sp.getString('appartamento_temp_$id');
+      if (ap != null) {
+        _appartamento_ = AppartamentoModel.fromJson(jsonDecode(ap));
+        appartamentiSp.add(_appartamento_);
+      }
+      id++;
+    }
   }
 
   @override
@@ -94,13 +113,17 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
                     child: ListTile(
                       leading: Icon(HeroiconsSolid.home,
                           color: CustomColors.iconColor),
-                      title: Text(
-                          'Appartamento - interno: ${appartamento['interno']}'),
+                      title:
+                          Text('Appartamento - interno: ${appartamento['id']}'),
                       subtitle: Text(
                           'Piano: ${appartamento['piano']} - Scala: ${appartamento['scala']}'),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () {
-                        Navigator.pushNamed(context, '/newAppartamento');
+                        Navigator.pushNamed(context, '/modifica_appartamento',
+                            arguments: ModificaAppartamentoPageArgs(data: {
+                              'id': _idAnaCondominio,
+                              'idAppartamento': appartamento['id']
+                            }));
                       },
                     ),
                   );

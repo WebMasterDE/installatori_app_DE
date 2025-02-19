@@ -56,6 +56,14 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
   String matricolaString = '';
   AppartamentoModel? _appartamento;
 
+  bool _modifica = false;
+
+  String _matricolaModifica = "";
+
+  String _saveNota = ""; //serve per salvare la nota prima della modifica
+
+
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +71,8 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
     _idAnaCondominio = widget.arguments.data['id'];
     _idAppartamento = widget.arguments.data['idAppartamento'];
     _selectedStrumento = widget.arguments.data['selectedStrumento'];
+    _modifica = widget.arguments.data['modifica'];
+    _matricolaModifica = widget.arguments.data['matricola_modifica'];
 
     getAppartamento();
   }
@@ -74,6 +84,66 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
     }
+    if (_modifica) {
+      initializeModifica();
+    }
+  }
+
+  void initializeModifica() async {
+    RipartitoriModel ripartitore;
+    switch (_selectedStrumento) {
+      case "Contatore Freddo":
+        ripartitore = _appartamento!.raffrescamento!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        break;
+      case "Contatore Caldo/Freddo":
+        ripartitore = _appartamento!.riscaldamento!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        break;
+      case "Contatore Caldo":
+        ripartitore = _appartamento!.riscaldamento!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        break;
+      case "Ripartitori Riscaldamento":
+        ripartitore = _appartamento!.riscaldamento!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        // TODO questi dati sono inseribili solo nel caso dei ripartitori riscaldamento, da scommentare quando modifichiamo i model
+        // _altezzaController.text =ripartitore.altezza.toString().replaceAll('.', ',');
+        // _larghezzaController.text =ripartitore.larghezza.toString().replaceAll('.', ',');
+        // _profonditaController.text =ripartitore.profondita.toString().replaceAll('.', ',');
+        // _nElementiController.text =ripartitore.numeroElementi.toString().replaceAll('.', ',');
+        break;
+      case "Contatore Acqua Calda":
+        ripartitore = _appartamento!.acquaCalda!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        break;
+      case "Contatore Acqua Fredda":
+        ripartitore = _appartamento!.acquaFredda!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaModifica);
+        break;
+      default:
+        throw Exception("Invalid strumento selected");
+    }
+
+    _matricolaController.text = ripartitore.matricola;
+    _descrizioneController.text = ripartitore.descrizione;
+    _vanoController.text = ripartitore.vano.toString();
+    _tipologiaController.text = ripartitore.tipologia!;
+    _altezzaController.text =
+        ripartitore.altezza.toString().replaceAll('.', ',');
+    _larghezzaController.text =
+        ripartitore.larghezza.toString().replaceAll('.', ',');
+    _profonditaController.text =
+        ripartitore.profondita.toString().replaceAll('.', ',');
+    _nElementiController.text =
+        ripartitore.numeroElementi.toString().replaceAll('.', ',');
+    final File newImage = File(ripartitore.pathImage);
+    _pathUploadImage = ripartitore.pathImage;
+    _saveNota = ripartitore.note!;
+
+    setState(() {
+      _uploadImage = newImage;
+    });
   }
 
   @override
@@ -91,6 +161,12 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         ),
         body: Column(
           children: [
+            if(_modifica)
+                        CustomHorizontalStepper(
+              steps: const ["1", "2",],
+              currentStep: 1,
+            ),
+            if(!_modifica)
             CustomHorizontalStepper(
               steps: const ["1", "2", "3", "4"],
               currentStep: 2,
@@ -433,16 +509,15 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
-        if (_riscaldamento || _raffrescamento) {
-          setState(() {
-            _isNotCompletedCheck = false;
-          });
-        } else {
-          setState(() {
-            _isNotCompletedCheck = true;
-          });
-        }
-      
+      if (_riscaldamento || _raffrescamento) {
+        setState(() {
+          _isNotCompletedCheck = false;
+        });
+      } else {
+        setState(() {
+          _isNotCompletedCheck = true;
+        });
+      }
 
       if (_uploadImage == null) {
         setState(() {
@@ -473,31 +548,85 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
         switch (_selectedStrumento) {
           case "Contatore Freddo":
-            _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+            int indexra = _appartamento!.raffrescamento!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (indexra != -1) {
+              ripartitore.note = _saveNota;
+              _appartamento!.raffrescamento!.ripartitori![indexra] =
+                  ripartitore;
+            } else {
+              _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+            }
             _appartamento!.raffrescamento!.completato = true;
             break;
           case "Contatore Caldo/Freddo":
-            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            int indexra = _appartamento!.raffrescamento!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (indexra != -1) {
+              ripartitore.note = _saveNota;
+              _appartamento!.raffrescamento!.ripartitori![indexra] =
+                  ripartitore;
+            } else {
+              _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+            }
+            int indexri = _appartamento!.riscaldamento!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (indexri != -1) {
+              ripartitore.note = _saveNota;
 
-            _appartamento!.raffrescamento!.ripartitori!.add(ripartitore);
+              _appartamento!.riscaldamento!.ripartitori![indexri] = ripartitore;
+            } else {
+              _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            }
 
             _appartamento!.riscaldamento!.completato = true;
             _appartamento!.raffrescamento!.completato = true;
             break;
           case "Contatore Caldo":
-            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            int index = _appartamento!.riscaldamento!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (index != -1) {
+              ripartitore.note = _saveNota;
 
+              _appartamento!.riscaldamento!.ripartitori![index] = ripartitore;
+            } else {
+              _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            }
             _appartamento!.riscaldamento!.completato = true;
             break;
           case "Ripartitori Riscaldamento":
-            _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            int index = _appartamento!.riscaldamento!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (index != -1) {
+              ripartitore.note = _saveNota;
+
+              _appartamento!.riscaldamento!.ripartitori![index] = ripartitore;
+            } else {
+              _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
+            }
             break;
           case "Contatore Acqua Calda":
-            _appartamento!.acquaCalda!.ripartitori!.add(ripartitore);
+            int index = _appartamento!.acquaCalda!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (index != -1) {
+              ripartitore.note = _saveNota;
+
+              _appartamento!.acquaCalda!.ripartitori![index] = ripartitore;
+            } else {
+              _appartamento!.acquaCalda!.ripartitori!.add(ripartitore);
+            }
             _appartamento!.acquaCalda!.completato = true;
             break;
           case "Contatore Acqua Fredda":
-            _appartamento!.acquaFredda!.ripartitori!.add(ripartitore);
+            int indexri = _appartamento!.acquaFredda!.ripartitori!
+                .indexWhere((rip) => rip.matricola == _matricolaModifica);
+            if (indexri != -1) {
+              ripartitore.note = _saveNota;
+
+              _appartamento!.acquaFredda!.ripartitori![indexri] = ripartitore;
+            } else {
+              _appartamento!.acquaFredda!.ripartitori!.add(ripartitore);
+            }
             _appartamento!.acquaFredda!.completato = true;
             break;
         }
@@ -513,7 +642,8 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
               'id': _idAnaCondominio,
               'idAppartamento': _idAppartamento,
               'matricola': ripartitore.matricola,
-              'selectedStrumento': _selectedStrumento
+              'selectedStrumento': _selectedStrumento,
+              'modifica': _modifica,
             }));
       }
     }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/appartamenti/recap_ripartitori.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -25,6 +26,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
   AppartamentoModel? _appartamento;
   String _selectedStrumento = "";
   String _matricolaRipartitore = "";
+  bool _modifica = false;
 
   final TextEditingController _notaRipartitore = TextEditingController();
 
@@ -36,6 +38,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
     _idAppartamento = widget.arguments.data['idAppartamento'];
     _matricolaRipartitore = widget.arguments.data['matricola'];
     _selectedStrumento = widget.arguments.data['selectedStrumento'];
+    _modifica = widget.arguments.data['modifica'];
 
     getAppartamento();
   }
@@ -46,6 +49,34 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
+    }
+
+    if (_modifica) {
+      initializeModifica();
+    }
+  }
+
+  void initializeModifica() async {
+    RipartitoriModel ripartitore;
+    switch (_selectedStrumento) {
+      case "Contatore Freddo" ||
+            "Contatore Caldo/Freddo" ||
+            "Contatore Caldo" ||
+            "Ripartitori Riscaldamento":
+        ripartitore = _appartamento!.raffrescamento!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
+        _notaRipartitore.text = ripartitore.note!;
+        break;
+      case "Contatore Acqua Calda":
+        ripartitore = _appartamento!.acquaCalda!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
+        _notaRipartitore.text = ripartitore.note!;
+        break;
+      case "Contatore Acqua Fredda":
+        ripartitore = _appartamento!.acquaFredda!.ripartitori!
+            .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
+        _notaRipartitore.text = ripartitore.note!;
+        break;
     }
   }
 
@@ -66,6 +97,15 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            if (_modifica)
+              CustomHorizontalStepper(
+                steps: const [
+                  "1",
+                  "2",
+                ],
+                currentStep: 2,
+              ),
+              if(!_modifica)
             CustomHorizontalStepper(
               steps: const ["1", "2", "3", "4"],
               currentStep: 3,
@@ -198,50 +238,51 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
   }
 
   void _stepBack() async {
-    final sp = await SharedPreferences.getInstance();
-    sp.setInt('id_appartamento_from', _idAppartamento);
-    switch (_selectedStrumento) {
-      case "Contatore Freddo":
-        _appartamento!.raffrescamento!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
-        break;
-      case "Contatore Caldo/Freddo":
-        _appartamento!.raffrescamento!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    // final sp = await SharedPreferences.getInstance();
+    // sp.setInt('id_appartamento_from', _idAppartamento);
+    // switch (_selectedStrumento) {
+    //   case "Contatore Freddo":
+    //     _appartamento!.raffrescamento!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     break;
+    //   case "Contatore Caldo/Freddo":
+    //     _appartamento!.raffrescamento!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
-        _appartamento!.riscaldamento!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     _appartamento!.riscaldamento!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
-        break;
-      case "Contatore Caldo":
-        _appartamento!.riscaldamento!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     break;
+    //   case "Contatore Caldo":
+    //     _appartamento!.riscaldamento!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
-        break;
-      case "Ripartitori Riscaldamento":
-        _appartamento!.riscaldamento!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
-        break;
-      case "Contatore Acqua Calda":
-        _appartamento!.acquaCalda!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     break;
+    //   case "Ripartitori Riscaldamento":
+    //     _appartamento!.riscaldamento!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     break;
+    //   case "Contatore Acqua Calda":
+    //     _appartamento!.acquaCalda!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
-        break;
-      case "Contatore Acqua Fredda":
-        _appartamento!.acquaFredda!.ripartitori!.removeWhere(
-            (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
+    //     break;
+    //   case "Contatore Acqua Fredda":
+    //     _appartamento!.acquaFredda!.ripartitori!.removeWhere(
+    //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
-        break;
-    }
+    //     break;
+    // }
 
-    sp.setString('appartamento_temp_$_idAppartamento',
-        jsonEncode(_appartamento!.toJson()));
-    Navigator.pushNamed(context, "/newStrumento",
-        arguments: NewStrumentoPageArgs(data: {
-          'id': _idAnaCondominio,
-          'idAppartamento': _idAppartamento,
-          'selectedStrumento': _selectedStrumento
-        }));
+    // sp.setString('appartamento_temp_$_idAppartamento',
+    //     jsonEncode(_appartamento!.toJson()));
+    // Navigator.pushNamed(context, "/newStrumento",
+    //     arguments: NewStrumentoPageArgs(data: {
+    //       'id': _idAnaCondominio,
+    //       'idAppartamento': _idAppartamento,
+    //       'selectedStrumento': _selectedStrumento,
+    //     }));
+    Navigator.pop(context);
   }
 }
 

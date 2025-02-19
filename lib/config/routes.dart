@@ -4,6 +4,7 @@ import 'package:installatori_de/pages/appartamenti/new_appartamento_page.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/appartamenti/nota_appartameto.dart';
 import 'package:installatori_de/pages/appartamenti/nota_ripartitori.dart';
+import 'package:installatori_de/pages/appartamenti/pagina_modifica.dart';
 import 'package:installatori_de/pages/appartamenti/recap_ripartitori.dart';
 import 'package:installatori_de/pages/condomini/condomini_page.dart';
 import 'package:installatori_de/pages/login/login_page.dart';
@@ -38,7 +39,10 @@ class Routes {
           ),
       NotaAppartamentoPage.route: (_) => NotaAppartamentoPage(
           arguments: settings.arguments as NotaAppartamentoPageArgs
-          )
+          ),
+      ModificaAppartamentoPage.route: (_) => ModificaAppartamentoPage(
+          arguments: settings.arguments as ModificaAppartamentoPageArgs
+          ),
     };
   }
 }
