@@ -8,7 +8,7 @@ class AppartamentoModel {
   String? pathUploadImage;
   late String nome;
   late String cognome;
-  late String mail;
+  late String? mail;
   int? numeroRipartitoriRiscaldamento; //viene inserito a 1 in caso di contatori diretti
   String? note;
   StatoRipartitori? raffrescamento;
@@ -24,7 +24,7 @@ class AppartamentoModel {
     this.pathUploadImage,
     required this.nome,
     required this.cognome,
-    required this.mail,
+    this.mail,
     this.note,
     required this.numeroRipartitoriRiscaldamento,
     StatoRipartitori? raffrescamento,
@@ -34,12 +34,12 @@ class AppartamentoModel {
   });
 
   AppartamentoModel.fromJson(Map<String, dynamic> json) {
-    print("JSON data: $json");
       id= json['id'];
       interno= json['interno'];
       piano= json['piano'];
       scala= json['scala'];
       pathUploadImage= json['pathUploadImage'];
+      //TODO: pensare a come gestire più inquilini
       nome= json['nome'];
       cognome= json['cognome'];
       mail= json['mail'];

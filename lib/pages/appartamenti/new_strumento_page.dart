@@ -115,9 +115,9 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                         SizedBox(
                           height: 10,
                         ),
-                        if (_selectedStrumento == "Contatore Caldo/Freddo")
-                          Text('Tipologia ripartitori',
-                              style: Theme.of(context).textTheme.labelSmall),
+                        //TODO: verificare se necessario
+                        /*Text('Tipologia ripartitori',
+                            style: Theme.of(context).textTheme.labelSmall),
                         SizedBox(
                           height: 10,
                         ),
@@ -150,7 +150,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                               style: Theme.of(context).textTheme.displaySmall),
                         SizedBox(
                           height: 20,
-                        ),
+                        ),*/
                         Row(
                           children: [
                             Expanded(
@@ -219,57 +219,59 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                             controller: _tipologiaController,
                             required: true,
                           ),
-                        Row(
-                          spacing: 5,
-                          children: [
-                            Expanded(
-                                child: CustomTextfield(
-                              text: "Altezza (cm)",
-                              controller: _altezzaController,
-                              required: true,
-                              textInputType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                            )),
-                            Expanded(
-                                child: CustomTextfield(
-                              text: "Larghezza (cm)",
-                              controller: _larghezzaController,
-                              required: true,
-                              textInputType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                            ))
-                          ],
-                        ),
-                        Row(
-                          spacing: 5,
-                          children: [
-                            Expanded(
-                                child: CustomTextfield(
-                              text: "Profodità (cm)",
-                              controller: _profonditaController,
-                              required: true,
-                              textInputType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                            )),
-                            Expanded(
-                                child: CustomTextfield(
-                              text: "Numero elementi",
-                              controller: _nElementiController,
-                              required: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Campo richiesto';
-                                }
+                        if (_selectedStrumento == "riscaldamento")
+                          Row(
+                            spacing: 5,
+                            children: [
+                              Expanded(
+                                  child: CustomTextfield(
+                                text: "Altezza (cm)",
+                                controller: _altezzaController,
+                                required: true,
+                                textInputType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                              )),
+                              Expanded(
+                                  child: CustomTextfield(
+                                text: "Larghezza (cm)",
+                                controller: _larghezzaController,
+                                required: true,
+                                textInputType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                              ))
+                            ],
+                          ),
+                        if (_selectedStrumento == "riscaldamento")
+                          Row(
+                            spacing: 5,
+                            children: [
+                              Expanded(
+                                  child: CustomTextfield(
+                                text: "Profodità (cm)",
+                                controller: _profonditaController,
+                                required: true,
+                                textInputType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                              )),
+                              Expanded(
+                                  child: CustomTextfield(
+                                text: "Numero elementi",
+                                controller: _nElementiController,
+                                required: true,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Campo richiesto';
+                                  }
 
-                                final intRegExp = RegExp(r'^[0-9]+$');
-                                if (!intRegExp.hasMatch(value)) {
-                                  return 'Inserire un numero intero';
-                                }
-                              },
-                              textInputType: TextInputType.number,
-                            ))
-                          ],
-                        ),
+                                  final intRegExp = RegExp(r'^[0-9]+$');
+                                  if (!intRegExp.hasMatch(value)) {
+                                    return 'Inserire un numero intero';
+                                  }
+                                },
+                                textInputType: TextInputType.number,
+                              ))
+                            ],
+                          ),
                         Row(
                           children: [
                             Expanded(
@@ -403,8 +405,28 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         final String timestamp =
             DateTime.now().millisecondsSinceEpoch.toString();
 
+        String nomeTipologia = '';
+
+        switch (_selectedStrumento) {
+          case "Contatore Freddo":
+            nomeTipologia = 'raffrescamento';
+            break;
+          case "Contatore Caldo/Freddo":
+            nomeTipologia = 'riscaldamento_raffrescamento';
+            break;
+          case "Contatore Caldo" || "Ripartitori Riscaldamento":
+            nomeTipologia = 'riscaldamento';
+            break;
+          case "Contatore Acqua Calda":
+            nomeTipologia = 'acquaCalda';
+            break;
+          case "Contatore Acqua Fredda":
+            nomeTipologia = 'acquaFredda';
+            break;
+        }
+
         _pathUploadImage =
-            path.join(appDir.path, '$_idAnaCondominio-$timestamp.jpg');
+            path.join(appDir.path, '${_idAnaCondominio}_${_idAppartamento}_${nomeTipologia}_$timestamp.${image.path.split('.').last.toLowerCase()}');
 
         final File newImage = await File(image.path).copy(_pathUploadImage!);
 
@@ -433,7 +455,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
-        if (_riscaldamento || _raffrescamento) {
+        /*if (_riscaldamento || _raffrescamento) {
           setState(() {
             _isNotCompletedCheck = false;
           });
@@ -441,7 +463,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
           setState(() {
             _isNotCompletedCheck = true;
           });
-        }
+        }*/
       
 
       if (_uploadImage == null) {
@@ -454,19 +476,16 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         });
       }
 
-      if ((_riscaldamento || _raffrescamento) && _uploadImage != null) {
+      if (/*(_riscaldamento || _raffrescamento) && */ _uploadImage != null) {
         RipartitoriModel ripartitore = RipartitoriModel(
             matricola: _matricolaController.text,
             descrizione: _descrizioneController.text,
             vano: int.parse(_vanoController.text),
             tipologia: _tipologiaController.text,
-            altezza: double.parse(_altezzaController.text.replaceAll(',', '.')),
-            larghezza:
-                double.parse(_larghezzaController.text.replaceAll(',', '.')),
-            profondita:
-                double.parse(_profonditaController.text.replaceAll(',', '.')),
-            numeroElementi:
-                int.parse(_nElementiController.text.replaceAll(',', '.')),
+            altezza: _altezzaController.text.isNotEmpty ? double.parse(_altezzaController.text.replaceAll(',', '.')) : null,
+            larghezza: _larghezzaController.text.isNotEmpty ? double.parse(_larghezzaController.text.replaceAll(',', '.')) : null,
+            profondita: _profonditaController.text.isNotEmpty ? double.parse(_profonditaController.text.replaceAll(',', '.')) : null,
+            numeroElementi: _nElementiController.text.isNotEmpty ? int.parse(_nElementiController.text.replaceAll(',', '.')) : null,
             pathImage: _pathUploadImage!);
 
         print(jsonEncode(_appartamento));

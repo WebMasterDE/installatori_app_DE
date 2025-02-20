@@ -287,7 +287,7 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
             DateTime.now().millisecondsSinceEpoch.toString();
 
         _pathUploadImage =
-            path.join(appDir.path, '$_idAnaCondominio-$timestamp.jpg');
+            path.join(appDir.path, 'appartamento_${_idAnaCondominio}_$timestamp.${image.path.split('.').last.toLowerCase()}');
 
         final File newImage = await File(image.path).copy(_pathUploadImage!);
 

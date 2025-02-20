@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class ApiRequests {
-  static const String BASE_URL = 'http://192.168.61.182:8443/api/';
+  static const String BASE_URL = 'http://192.168.2.211:8443/api/';
   static bool _isRefreshing = false;
 
   static Future<dynamic> sendRequest(
@@ -101,4 +102,86 @@ class ApiRequests {
       return null;
     }
   }
+
+  static Future<dynamic> sendMultipartAuthRequest(
+      String url, String method, Map<String, dynamic> body, Map<String, List<File>> files) async {
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String token = prefs.getString('token') ?? '';
+
+      if (token.isEmpty) {
+        return false;
+      }
+
+      var uri = Uri.parse(BASE_URL + url);
+      var request = http.MultipartRequest('POST', uri);
+
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      request.fields['appartamento'] = jsonEncode(body);
+
+      print(files.toString);
+
+      for (var entry in files.entries) {
+        for (var file in entry.value) {
+          var stream = http.ByteStream(file.openRead());
+          var length = await file.length();
+          var multipartFile = http.MultipartFile(
+            entry.key,
+            stream,
+            length,
+            filename: file.path.split('/').last
+          );
+          request.files.add(multipartFile);
+        }
+      }
+
+      print(request.toString());
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      var responseBody = json.decode(response.body);
+
+      //caso in cui il token è scaduto durante l'uso dello'applicazione
+      if (responseBody['error'] == true &&
+          responseBody['message'] == 'jwt expired' &&
+          !_isRefreshing) 
+        {
+          _isRefreshing = true;
+
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          final String refreshToken = prefs.getString('refreshToken') ?? '';
+
+          final Map<String, String> headers_r = {
+            'Authorization': 'Bearer $refreshToken'
+          };
+          //faccio la richiesta al backen per verificare il refreshToken e nel caso ricevo un nuovo token e refreshToken
+          final rs = await sendRequest('refresh', 'GET', {}, headers: headers_r);
+          if (rs['error'] == false) {
+            prefs.setString('token', rs['data']['token']);
+            prefs.setString('refreshToken', rs['data']['refreshToken']);
+
+            final Map<String, String> newHeaders = {
+              'Authorization': 'Bearer ${rs['data']['token']}'
+            };
+            _isRefreshing = false;
+
+            return await sendRequest(url, method, body, headers: newHeaders);
+          } //caso in cui il refreshToken è scaduto
+          else {
+            _isRefreshing = false;
+            return {'errore_double_token': true};
+          }
+            }
+
+        if(responseBody['success'] == false){
+          return {'success': false};
+      }
+
+      return {'success': false};
+  }
+
+
 }

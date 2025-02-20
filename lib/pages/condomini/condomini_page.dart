@@ -1,11 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/components/stepper.dart';
+import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
+import 'package:installatori_de/providers/save_data_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:installatori_de/providers/auth_provider.dart';
+import 'package:installatori_de/pages/appartamenti/selezione_strumenti_page.dart';
 
 class CondominiPage extends StatefulWidget {
   static const route = '/condomini';
@@ -151,6 +157,15 @@ class _CondominiPageState extends State<CondominiPage> {
                                         'nome': condominio['nome']
                                       })
                                   );
+
+                                  //saveDataDev();
+
+                                  /*Navigator.pushNamed(context, '/selezione_strumenti',
+                                      arguments: SelezioneStrumentiPageArgs(data: {
+                                        'id': condominio['id_ana_condominio'],
+                                        'idAppartamento': 0
+                                      })
+                                  );*/
                                 },
                               ),
                             );
@@ -165,5 +180,25 @@ class _CondominiPageState extends State<CondominiPage> {
       ),
       backgroundColor: CustomColors.secondaryBackground,
     );
+  }
+
+  void saveDataDev() async {
+
+    var sh = await SharedPreferences.getInstance();
+    String? data = sh.getString('condomini');
+
+    print(data);
+
+    //String data = '[{"idAnaCondominio":508,"appartamenti":[{"id":0,"interno":"1","piano":1,"scala":"1","pathUploadImage":"/data/user/0/com.example.installatori_de/app_flutter/appartamento_508_1740043382326.jpg","nome":"inquilino1 ","cognome":"cinquilino1 ","mail":"inquilino1@gmail.com","note":null,"numeroRipartitoriRiscaldamento":1,"raffrescamento":null,"riscaldamento":null,"acquaCalda":null,"acquaFredda":null}]}]';
+    List<CondominioModel> condominiList = List.from(jsonDecode(data!)).map((condominio) {
+          return CondominioModel.fromJson(condominio);
+    }).toList();
+
+    
+
+    for(CondominioModel cdm in condominiList){
+      SaveDataProvider().saveCondominio(cdm);
+    }
+
   }
 }

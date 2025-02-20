@@ -39,13 +39,11 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
     _selectedStrumento = widget.arguments.data['selectedStrumento'];
 
     _ripartitori = getRipartitori();
-    getAppartamento();
   }
 
   Future<List<RipartitoriModel>> getRipartitori() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? ap = sp.getString('appartamento_temp_$_idAppartamento');
-
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
@@ -53,24 +51,15 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
           _selectedStrumento == "Contatore Caldo/Freddo" ||
           _selectedStrumento == "Contatore Caldo") {
         return _appartamento!.riscaldamento!.ripartitori!;
+      }else if (_selectedStrumento == "Contatore Freddo") {
+        return _appartamento!.raffrescamento!.ripartitori!;
+      } else if (_selectedStrumento == "Contatore Acqua Calda") {
+        return _appartamento!.acquaCalda!.ripartitori!;
+      } else if (_selectedStrumento == "Contatore Acqua Fredda") {
+        return _appartamento!.acquaFredda!.ripartitori!;
       }
-    } else if (_selectedStrumento == "Contatore Freddo") {
-      return _appartamento!.raffrescamento!.ripartitori!;
-    } else if (_selectedStrumento == "Contatore Acqua Calda") {
-      return _appartamento!.acquaCalda!.ripartitori!;
-    } else if (_selectedStrumento == "Contatore Acqua Fredda") {
-      return _appartamento!.acquaFredda!.ripartitori!;
     }
     return [];
-  }
-
-  void getAppartamento() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? ap = sp.getString('appartamento_temp_$_idAppartamento');
-
-    if (ap != null) {
-      _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
-    }
   }
 
   @override
@@ -102,7 +91,22 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
                 future: _ripartitori,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Skeletonizer(
+                            child: ListView.builder(
+                                itemCount: 5,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    child: ListTile(
+                                      leading: Icon(
+                                        HeroiconsSolid.buildingOffice2,
+                                        color: CustomColors.iconColor,
+                                      ),
+                                      title: Text(''),
+                                      subtitle: Text(''),
+                                      trailing: Icon(Icons.arrow_forward_ios),
+                                    ),
+                                  );
+                                }));
                   } else if (snapshot.hasError) {
                     return Center(
                         child: Text('Errore nel caricamento dei dati'));
@@ -123,7 +127,6 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
                                 "Matricola: ${ripartitore.matricola} - ${ripartitore.vano}"),
                             subtitle: Text(
                                 "Vano: ${ripartitore.vano} Descrizione: ${ripartitore.descrizione}"),
-                            trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () {},
                           ),
                         );

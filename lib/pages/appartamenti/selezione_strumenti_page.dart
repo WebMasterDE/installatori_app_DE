@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
@@ -10,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:installatori_de/components/stepper.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
+import 'package:provider/provider.dart';
+import 'package:installatori_de/providers/save_data_provider.dart';
 
 class SelezioneStrumentiPage extends StatefulWidget {
   static const route = '/selezione_strumenti';
@@ -34,6 +37,9 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
   final TextEditingController _numeroRipartitoriController =
       TextEditingController();
 
+  bool _exit = false;
+  bool _partial = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,10 +47,10 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
     _idAnaCondominio = widget.arguments.data['id'];
     _idAppartamento = widget.arguments.data['idAppartamento'];
 
+    _strumentiCondominio =  CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
+
     getAppartamento();
 
-    _strumentiCondominio =
-        CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
   }
 
   void getAppartamento() async {
@@ -53,6 +59,40 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
+
+      var strumenti = await CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
+
+      int countActiveService = strumenti.length;
+
+      int countCompletedService = 0;
+
+      if(_appartamento!.riscaldamento != null && _appartamento!.riscaldamento!.completato){
+          countCompletedService++;
+      }
+
+      if(_appartamento!.raffrescamento != null && _appartamento!.raffrescamento!.completato){
+          countCompletedService++;
+      }
+
+      if(_appartamento!.acquaCalda != null && _appartamento!.acquaCalda!.completato){
+          countCompletedService++;
+      }
+
+      if(_appartamento!.acquaFredda != null && _appartamento!.acquaFredda!.completato){
+          countCompletedService++;
+      }
+      
+      if(countActiveService != 0 || countCompletedService != 0){
+        if(countActiveService == countCompletedService){
+          setState(() {
+            _exit = true;
+          });
+        }else{
+          setState(() {
+            _partial = true;
+          });
+        }
+      }
     }
   }
 
@@ -97,13 +137,15 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                       )));
                     }
                   } else if (snapshot.hasData) {
+                    
                     listViewChildren.addAll(snapshot.data!.map((strumento) {
                       int index = snapshot.data!.indexOf(strumento);
+                      
                       bool isDisabled = false;
                       if (_appartamento != null) {
                         switch (strumento['nome_servizio']) {
                           case "Contatore Freddo":
-                            if (_appartamento!.riscaldamento != null) {
+                            if (_appartamento!.raffrescamento != null) {
                               isDisabled =
                                   _appartamento!.raffrescamento!.completato;
                             }
@@ -126,8 +168,8 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                             if (_appartamento!.riscaldamento != null) {
                               isDisabled =
                                   _appartamento!.riscaldamento!.completato;
-                              break;
                             }
+                            break;
                           case "Contatore Acqua Calda":
                             if (_appartamento!.acquaCalda != null) {
                               isDisabled =
@@ -142,6 +184,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                             break;
                         }
                       }
+
                       String nomeServizio = strumento['nome_servizio'];
 
                       Color cardColor = isDisabled
@@ -179,7 +222,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                       listViewChildren.addAll([
                         SizedBox(height: 20),
                         Text(
-                            'Inserire il numero dei ripartitori del riscaldamento, in caso si contatori diretti inserire 1',
+                            'Inserire il numero dei ripartitori del riscaldamento, in caso di contatori diretti inserire 1',
                             style: Theme.of(context).textTheme.displaySmall),
                         CustomTextfield(
                             text: 'Numero Ripartitori riscaldamento',
@@ -208,30 +251,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
         width: double.infinity,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'Indietro',
-                  onPressed: () async {
-                    final sh = await SharedPreferences.getInstance();
-                    sh.setInt('id_appartamento_from', _idAppartamento);
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: CustomButton(
-                  text: 'Avanti',
-                  onPressed: () {
-                    _stepSucc();
-                  },
-                ),
-              ),
-            ],
-          ),
+          child: _createButton()
         ),
       ),
       backgroundColor: CustomColors.secondaryBackground,
@@ -239,7 +259,6 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
   }
 
   void _stepSucc() async {
-    print(_appartamento);
     if (_selectedIndex != -1 && _appartamento != null) {
       if (_selectedStrumento == "Ripartitori Riscaldamento" &&
           _numeroRipartitoriController.text.isEmpty) {
@@ -295,6 +314,77 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
           }));
     }
   }
+
+
+  Widget _createButton(){
+    if(_exit){
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: CustomButton(
+                text: 'Salva ed esci',
+                onPressed: () {
+                  Provider.of<SaveDataProvider>(context, listen: false).saveData(context, _idAnaCondominio, _idAppartamento);
+                  Navigator.pushNamedAndRemoveUntil(context, '/appartamenti', (route) => false, arguments: AppartamentiPageArgs(data: {'id': _idAnaCondominio}));
+                },
+              ),
+            ),
+          ],
+        );
+    }else if(!_exit && _partial){
+      return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: 'Salva ed esci',
+                  onPressed: () async {
+                    Provider.of<SaveDataProvider>(context, listen: false).saveData(context, _idAnaCondominio, _idAppartamento);
+                    Navigator.pushNamedAndRemoveUntil(context, '/appartamenti', (route) => false,  arguments: AppartamentiPageArgs(data: {'id': _idAnaCondominio}));
+                  },
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: CustomButton(
+                  text: 'Avanti',
+                  onPressed: () {
+                    _stepSucc();
+                  },
+                ),
+              ),
+            ],
+          );
+    }else{
+      return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: 'Indietro',
+                  onPressed: () async {
+                    final sh = await SharedPreferences.getInstance();
+                    sh.setInt('id_appartamento_from', _idAppartamento);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: CustomButton(
+                  text: 'Avanti',
+                  onPressed: () {
+                    _stepSucc();
+                  },
+                ),
+              ),
+            ],
+          );
+    }
+  }
+
+
 }
 
 class SelezioneStrumentiPageArgs {

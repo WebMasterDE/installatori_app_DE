@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/components/custom_button.dart';
+import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/providers/appartamenti_provider.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
@@ -23,7 +24,7 @@ class AppartamentiPage extends StatefulWidget {
 }
 
 class _AppartamentiPageState extends State<AppartamentiPage> {
-  late Future<List<dynamic>> appartamenti;
+  late Future<List<AppartamentoModel>> appartamenti;
 
   int _idAnaCondominio = 0;
   String _nomeCondominio = '';
@@ -33,7 +34,12 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
     super.initState();
 
     _idAnaCondominio = widget.arguments.data['id'];
-    _nomeCondominio = widget.arguments.data['nome'];
+
+    if(widget.arguments.data['nome'] != null){
+      _nomeCondominio = widget.arguments.data['nome'];
+    }else{
+      _nomeCondominio = "recuperarlo";
+    }
 
     appartamenti = AppartamentiProvider().getAppartamenti(_idAnaCondominio);
   }
@@ -53,7 +59,7 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder<List<dynamic>>(
+          child: FutureBuilder<List<AppartamentoModel>>(
             future: appartamenti,
             builder: (context, snapshot) {
               List<Widget> listViewChildren = [
@@ -95,9 +101,9 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
                       leading: Icon(HeroiconsSolid.home,
                           color: CustomColors.iconColor),
                       title: Text(
-                          'Appartamento - interno: ${appartamento['interno']}'),
+                          'Appartamento - interno: ${appartamento.interno}'),
                       subtitle: Text(
-                          'Piano: ${appartamento['piano']} - Scala: ${appartamento['scala']}'),
+                          'Piano: ${appartamento.piano} - Scala: ${appartamento.scala}'),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.pushNamed(context, '/newAppartamento');
