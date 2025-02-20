@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
 import 'package:installatori_de/models/condominio_model.dart';
+import 'package:installatori_de/pages/appartamenti/pagina_modifica.dart';
 import 'package:installatori_de/pages/appartamenti/selezione_strumenti_page.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,6 +34,10 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
   String? _pathUploadImage;
   int _idAnaCondominio = 0;
 
+  int _idAppartamento = 0;
+  bool _modifica = false;
+  AppartamentoModel? _appartamento;
+
   final TextEditingController _internoController = TextEditingController();
   final TextEditingController _scalaController = TextEditingController();
   final TextEditingController _pianoController = TextEditingController();
@@ -47,6 +52,33 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
     super.initState();
 
     _idAnaCondominio = widget.arguments.data['id'];
+    _idAppartamento = widget.arguments.data['idAppartamento']?? 0;
+    _modifica = widget.arguments.data['modifica']?? false;
+    initializeModifica();
+  }
+
+  void initializeModifica() async {
+    if (_modifica) {
+      SharedPreferences sp = await SharedPreferences.getInstance();
+      String? ap = sp.getString('appartamento_temp_$_idAppartamento');
+      if (ap != null) {
+        AppartamentoModel am = AppartamentoModel.fromJson(jsonDecode(ap));
+        _appartamento = am;
+        _internoController.text = am.interno;
+        _scalaController.text = am.scala;
+        _pianoController.text = am.piano.toString();
+        _nomeController.text = am.nome;
+        _cognomeController.text = am.cognome;
+        _mailController.text = am.mail;
+        _pathUploadImage = am.pathUploadImage;
+        final File newImage = File(am.pathUploadImage!);
+        _pathUploadImage = am.pathUploadImage!;
+
+        setState(() {
+          _uploadImage = newImage;
+        });
+      }
+    }
   }
 
   @override
@@ -250,23 +282,34 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
               child: Row(
                 spacing: 5,
                 children: [
-                  Expanded(
-                    child: CustomButton(
-                      text: 'Indietro',
-                      onPressed: () {
-                        _deleteImage();
-                        Navigator.pop(context);
-                      },
+                  if (_modifica)
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Termina Modifica',
+                        onPressed: () async {
+                          _stepSucc();
+                        },
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: CustomButton(
-                      text: 'Avanti',
-                      onPressed: () {
-                        _stepSucc();
-                      },
+                  if (!_modifica)
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Indietro',
+                        onPressed: () {
+                          _deleteImage();
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
-                  ),
+                  if (!_modifica)
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Avanti',
+                        onPressed: () {
+                          _stepSucc();
+                        },
+                      ),
+                    ),
                 ],
               ),
             )));
@@ -348,18 +391,31 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       //Creo entità appartamento
       AppartamentoModel am = AppartamentoModel(
-          id: idAppartamento,
-          interno: _internoController.text,
-          scala: _scalaController.text,
-          piano: int.parse(_pianoController.text),
-          pathUploadImage: _pathUploadImage,
-          nome: _nomeController.text,
-          cognome: _cognomeController.text,
-          mail: _mailController.text,
-          numeroRipartitoriRiscaldamento: 1,
+        id: idAppartamento,
+        interno: _internoController.text,
+        scala: _scalaController.text,
+        piano: int.parse(_pianoController.text),
+        pathUploadImage: _pathUploadImage,
+        nome: _nomeController.text,
+        cognome: _cognomeController.text,
+        mail: _mailController.text,
+        numeroRipartitoriRiscaldamento: 1,
       );
 
       int? idAppartamentoFrom = sharedPref.getInt('id_appartamento_from');
+
+      if (_modifica) {
+        am.id = _appartamento!.id;
+        am.riscaldamento = _appartamento!.riscaldamento;
+        am.raffrescamento = _appartamento!.raffrescamento;
+        am.acquaCalda = _appartamento!.acquaCalda;
+        am.acquaFredda = _appartamento!.acquaFredda;
+        am.numeroRipartitoriRiscaldamento = _appartamento!.numeroRipartitoriRiscaldamento;
+
+        idAppartamentoFrom = _appartamento!.id;
+        idAppartamento = _appartamento!.id!;
+        print("provaaaa${am.toJson()}");
+      }
 
       if (idAppartamentoFrom == null) {
         if (condominiList == null || condominio == null) {
@@ -399,20 +455,28 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       sharedPref.setString('condomini', jsonEncode(cmListString));
 
-      sharedPref.setString(
-          'appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
+      sharedPref.setString('appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
 
       print('condominio ${jsonDecode(sharedPref.getString('condomini')!)}');
-      print(
-          'appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
+      print('appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
 
       sharedPref.remove('id_appartamento_from');
 
+if(_modifica){
+  Navigator.pushNamed(context, "/modifica_appartamento",
+      arguments: ModificaAppartamentoPageArgs(data: {
+        'id': _idAnaCondominio,
+        'idAppartamento': idAppartamento
+      }));
+      return;
+}
       Navigator.pushNamed(context, "/selezione_strumenti",
           arguments: SelezioneStrumentiPageArgs(data: {
             'id': _idAnaCondominio,
             'idAppartamento': idAppartamento
           }));
+
+
     }
   }
 }

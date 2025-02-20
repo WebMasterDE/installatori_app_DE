@@ -5,7 +5,7 @@ import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/appartamenti/nota_appartameto.dart';
-import 'package:installatori_de/pages/appartamenti/nota_ripartitori.dart';
+import 'package:installatori_de/pages/appartamenti/pagina_modifica.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +29,7 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
   late Future<List<RipartitoriModel>> _ripartitori;
   AppartamentoModel? _appartamento;
   String _selectedStrumento = "";
+  bool _richiestaModifica = false;
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
     _idAnaCondominio = widget.arguments.data['id'];
     _idAppartamento = widget.arguments.data['idAppartamento'];
     _selectedStrumento = widget.arguments.data['selectedStrumento'];
-
+    _richiestaModifica = widget.arguments.data['richiestaModifica'] ?? false;
     _ripartitori = getRipartitori();
   }
 
@@ -62,6 +63,20 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
     return [];
   }
 
+  void getAppartamento() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? ap = sp.getString('appartamento_temp_$_idAppartamento');
+
+    if (ap != null) {
+      _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
+    }
+        if (sp.containsKey('richiesta_modifica')) {
+          setState(() {
+                  _richiestaModifica = sp.getBool('richiesta_modifica')!;
+          });
+        }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,10 +94,11 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            CustomHorizontalStepper(
-              steps: const ["1", "2", "3", "4"],
-              currentStep: 4,
-            ),
+            if (!_richiestaModifica)
+              CustomHorizontalStepper(
+                steps: const ["1", "2", "3", "4"],
+                currentStep: 4,
+              ),
             Text("Ripartitori Aggiunti",
                 style: Theme.of(context).textTheme.titleLarge),
             SizedBox(height: 60),
@@ -120,14 +136,25 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
                         return Card(
                           child: ListTile(
                             leading: Icon(
-                              HeroiconsSolid.buildingOffice2,
+                              HeroiconsSolid.wrenchScrewdriver,
                               color: CustomColors.iconColor,
                             ),
                             title: Text(
                                 "Matricola: ${ripartitore.matricola} - ${ripartitore.vano}"),
                             subtitle: Text(
                                 "Vano: ${ripartitore.vano} Descrizione: ${ripartitore.descrizione}"),
-                            onTap: () {},
+                            trailing: Icon(HeroiconsSolid.pencilSquare,
+                                color: CustomColors.iconColor),
+                            onTap: () {
+                              Navigator.pushNamed(context, "/newStrumento",
+                                  arguments: NewStrumentoPageArgs(data: {
+                                    'id': _idAnaCondominio,
+                                    'idAppartamento': _idAppartamento,
+                                    'selectedStrumento': _selectedStrumento,
+                                    'modifica': true,
+                                    'matricola_modifica': ripartitore.matricola,
+                                  }));
+                            },
                           ),
                         );
                       },
@@ -149,17 +176,17 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'Indietro',
-                  onPressed: () async {
-                    final sh = await SharedPreferences.getInstance();
-                    sh.setInt('id_appartamento_from', _idAppartamento);
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-              SizedBox(width: 10),
+              // Expanded(
+              //   child: CustomButton(
+              //     text: 'Indietro',
+              //     onPressed: () async {
+              //       final sh = await SharedPreferences.getInstance();
+              //       sh.setInt('id_appartamento_from', _idAppartamento);
+              //       Navigator.pop(context);
+              //     },
+              //   ),
+              // ),
+              // SizedBox(width: 10),
               Expanded(
                 child: CustomButton(
                   text: 'Avanti',
@@ -177,6 +204,21 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
   }
 
   void _stepSucc() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    if (sp.containsKey('richiesta_modifica')) {
+      bool richiestaModifica = sp.getBool('richiesta_modifica')!;
+      print(richiestaModifica);
+      if (richiestaModifica) {
+        sp.remove('richiesta_modifica');
+        Navigator.pushNamed(context, "/modifica_appartamento",
+            arguments: ModificaAppartamentoPageArgs(data: {
+              'id': _idAnaCondominio,
+              'idAppartamento': _idAppartamento,
+            }));
+        return;
+      }
+    }
+
     if (_selectedStrumento == "Ripartitori Riscaldamento") {
       if (_appartamento!.riscaldamento!.ripartitori!.length <
           _appartamento!.numeroRipartitoriRiscaldamento!) {
@@ -188,7 +230,6 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
             }));
       } else {
         _appartamento!.riscaldamento!.completato = true;
-        SharedPreferences sp = await SharedPreferences.getInstance();
         sp.setString('appartamento_temp_$_idAppartamento',
             jsonEncode(_appartamento!.toJson()));
 
@@ -200,14 +241,18 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
               'selectedStrumento': _selectedStrumento,
             }));
       }
-    } else if (_selectedStrumento == "Contatore Freddo" || _selectedStrumento == "Contatore Caldo/Freddo" || _selectedStrumento == "Contatore Caldo" || _selectedStrumento == "Contatore Acqua Calda" || _selectedStrumento == "Contatore Acqua Fredda") {
-        Navigator.pushNamed(context, "/nota_appartamento",
-            arguments: NotaAppartamentoPageArgs(data: {
-              'id': _idAnaCondominio,
-              'idAppartamento': _idAppartamento,
-            }));
-      }
+    } else if (_selectedStrumento == "Contatore Freddo" ||
+        _selectedStrumento == "Contatore Caldo/Freddo" ||
+        _selectedStrumento == "Contatore Caldo" ||
+        _selectedStrumento == "Contatore Acqua Calda" ||
+        _selectedStrumento == "Contatore Acqua Fredda") {
+      Navigator.pushNamed(context, "/nota_appartamento",
+          arguments: NotaAppartamentoPageArgs(data: {
+            'id': _idAnaCondominio,
+            'idAppartamento': _idAppartamento,
+          }));
     }
+  }
 }
 
 class RecapRipartitoriPageArgs {
