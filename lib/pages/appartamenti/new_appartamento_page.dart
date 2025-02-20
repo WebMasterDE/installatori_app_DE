@@ -69,7 +69,7 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
         _pianoController.text = am.piano.toString();
         _nomeController.text = am.nome;
         _cognomeController.text = am.cognome;
-        _mailController.text = am.mail;
+        _mailController.text = am.mail ?? '';
         _pathUploadImage = am.pathUploadImage;
         final File newImage = File(am.pathUploadImage!);
         _pathUploadImage = am.pathUploadImage!;
