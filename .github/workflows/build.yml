@@ -17,8 +17,8 @@ jobs:
       - name: Build
         run: |
           flutter pub get
-          flutter build apk
+          flutter analyze
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN}}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
