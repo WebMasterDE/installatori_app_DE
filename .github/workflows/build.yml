@@ -10,15 +10,20 @@ jobs:
     name: SonarQube
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      # The analysis requires to retrieve dependencies and build successfully
+          flutter-version: '3.16.0'
+          channel: 'stable'
       - name: Build
         run: |
           flutter pub get
-          flutter build apk
+          flutter analyze
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=WebMasterDE_installatori_app_DE
+            -Dsonar.organization=webmasterde
+        
