@@ -1,26 +1,28 @@
 class RipartitoriModel {
   String matricola;
-  String descrizione;
-  int vano;
+  String? descrizione;
+  int? vano;
   String? tipologia;
   double? altezza;
   double? larghezza;
   double? profondita;
   int? numeroElementi;
-  String pathImage;
+  String? pathImage;
   String? note;
+  String? produttore;
 
   RipartitoriModel(
       {required this.matricola,
-      required this.descrizione,
-      required this.vano,
+      this.descrizione,
+      this.vano,
       this.tipologia,
       this.altezza,
       this.larghezza,
       this.profondita,
       this.numeroElementi,
-      required this.pathImage,
-      this.note
+      this.pathImage,
+      this.note,
+      this.produttore
       }
     );
    RipartitoriModel.fromJson(Map<String, dynamic> json)
@@ -33,8 +35,8 @@ class RipartitoriModel {
          larghezza = json['larghezza'],
          profondita = json['profondita'],
          numeroElementi = json['numeroElementi'],
-         note = json['note'];
-
+         note = json['note'],
+         produttore = json['produttore'];
 
   Map<String, dynamic> toJson() {
     return {
@@ -47,7 +49,8 @@ class RipartitoriModel {
       'profondita': profondita,
       'numeroElementi': numeroElementi,
       'pathImage': pathImage,
-      'note': note
+      'note': note,
+      'produttore': produttore
     };
   }
 }

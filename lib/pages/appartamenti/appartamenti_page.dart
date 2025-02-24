@@ -27,12 +27,8 @@ class AppartamentiPage extends StatefulWidget {
 class _AppartamentiPageState extends State<AppartamentiPage> {
   late Future<List<AppartamentoModel>> appartamenti;
 
-  List<dynamic> appartamentiSp = [];
-
   int _idAnaCondominio = 0;
   String _nomeCondominio = '';
-
-  AppartamentoModel? _appartamento_;
 
   @override
   void initState() {
@@ -40,26 +36,13 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
 
     _idAnaCondominio = widget.arguments.data['id'];
 
-    if(widget.arguments.data['nome'] != null){
+    if (widget.arguments.data['nome'] != null) {
       _nomeCondominio = widget.arguments.data['nome'];
-    }else{
+    } else {
       _nomeCondominio = "recuperarlo";
     }
 
     appartamenti = AppartamentiProvider().getAppartamenti(_idAnaCondominio);
-  }
-
-  void getAppartamento() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    int id = 0;
-    while (!sp.containsKey('appartamento_temp_$id')) {
-      String? ap = sp.getString('appartamento_temp_$id');
-      if (ap != null) {
-        _appartamento_ = AppartamentoModel.fromJson(jsonDecode(ap));
-        appartamentiSp.add(_appartamento_);
-      }
-      id++;
-    }
   }
 
   @override
@@ -123,7 +106,9 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
                       subtitle: Text(
                           'Piano: ${appartamento.piano} - Scala: ${appartamento.scala}'),
                       trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () {
+                      onTap: () async {
+                        var sp = await SharedPreferences.getInstance();
+                        sp.setString('appartamento_temp_${appartamento.id}',jsonEncode(appartamento.toJson()));
                         Navigator.pushNamed(context, '/modifica_appartamento',
                             arguments: ModificaAppartamentoPageArgs(data: {
                               'id': _idAnaCondominio,
@@ -150,36 +135,12 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CustomButton(
-                text: 'Salva ed esci',
+                text: 'Fine',
                 onPressed: () {
-                  save(context, _idAnaCondominio); // Navigator.pop(context);
+                  Navigator.pushNamedAndRemoveUntil(context, '/condomini', (route) => false);
                 },
               ),
             )));
-  }
-}
-
-void save(BuildContext context, int _idAnaCondominio) async {
-  final sharedPref = await SharedPreferences.getInstance();
-  String? condominiString = sharedPref.getString('condomini');
-
-  if (condominiString != null) {
-    List<dynamic> jsonData = jsonDecode(condominiString);
-
-    if (jsonData.isNotEmpty && jsonData.first is Map<String, dynamic>) {
-      jsonData.forEach((element) {
-        if (element is Map<String, dynamic>) {
-          if (element['idAnaCondominio'] == _idAnaCondominio) {
-            CondominioModel cdm = CondominioModel.fromJson(element);
-            CondominiProvider().saveCondominio(context, cdm);
-          }
-        }
-      });
-    } else {
-      print("Errore: Il JSON è vuoto o non è nel formato corretto!");
-    }
-  } else {
-    print("Nessun condominio salvato nelle SharedPreferences");
   }
 }
 

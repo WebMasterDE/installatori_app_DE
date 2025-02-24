@@ -17,13 +17,14 @@ class AppartamentiProvider extends ChangeNotifier {
 
     if(response != null && response['error'] == false){
       appartamenti = List.from(response['data']).map((appartamento){
+        // print('provider${appartamento.toString()}');
         return AppartamentoModel.fromJson(appartamento);
       }).toList();
 
       var sp = await SharedPreferences.getInstance();
       String? condominiString = sp.getString('condomini');
 
-      print(condominiString);
+      print(appartamenti.toString());
 
       if (condominiString != null) {
         List<dynamic> condominiList = jsonDecode(condominiString);

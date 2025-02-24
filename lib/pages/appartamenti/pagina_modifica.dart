@@ -35,8 +35,7 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
     super.initState();
 
     _idAnaCondominio = widget.arguments.data['id'];
-    // _idAppartamento = widget.arguments.data['idAppartamento']; TODO da scommentare dopo merge
-    _idAppartamento = 0;
+    _idAppartamento = widget.arguments.data['idAppartamento']; 
 
     _appartamento = getAppartamento();
     _strumentiCondominio =CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
@@ -46,7 +45,7 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? ap = sp.getString('appartamento_temp_$_idAppartamento');
     if (ap != null) {
-      print(AppartamentoModel.fromJson(jsonDecode(ap)));
+      print('paginamodifica${AppartamentoModel.fromJson(jsonDecode(ap))}');
       return Future.value(AppartamentoModel.fromJson(jsonDecode(ap)));
     }
     return Future.value(AppartamentoModel(
@@ -102,7 +101,7 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
                               Text("Nome Inquilino",
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
-                              Text(appartamento.nome,
+                              Text(appartamento.nome ?? '',
                                   style: Theme.of(context).textTheme.labelSmall)
                             ],
                           )),
@@ -113,7 +112,7 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
                               Text("Cognome Inquilino",
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
-                              Text(appartamento.cognome,
+                              Text(appartamento.cognome ?? '',
                                   style:
                                       Theme.of(context).textTheme.labelSmall),
                             ],
@@ -225,15 +224,7 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
                   },
                 ),
               ),
-              SizedBox(width: 10),
-              Expanded(
-                child: CustomButton(
-                  text: 'Avanti',
-                  onPressed: () {
-                    _stepSucc();
-                  },
-                ),
-              ),
+
             ],
           ),
         ),
@@ -241,8 +232,6 @@ class _ModificaAppartamentoPageState extends State<ModificaAppartamentoPage> {
       backgroundColor: CustomColors.secondaryBackground,
     );
   }
-
-  void _stepSucc() async {}
 }
 
 class ModificaAppartamentoPageArgs {

@@ -36,33 +36,33 @@ class CondominiProvider extends ChangeNotifier {
     return List.empty();
   }
 
-  Future<bool> saveCondominio(
-      BuildContext context, CondominioModel condominio) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
+  // Future<bool> saveCondominio(
+  //     BuildContext context, CondominioModel condominio) async {
+  //   SharedPreferences sp = await SharedPreferences.getInstance();
 
-    for (int i = 0; i < condominio.appartamenti!.length; i++) {
-      String? appartamento_str =
-          sp.getString('appartamento_temp_${condominio.appartamenti![i].id}');
-      if (appartamento_str != null) {
-        AppartamentoModel appartamento =
-            AppartamentoModel.fromJson(jsonDecode(appartamento_str));
-        print("prova ${appartamento.toJson()}");
-        condominio.appartamenti![i] =
-            appartamento;
-      }
-    }
+  //   for (int i = 0; i < condominio.appartamenti!.length; i++) {
+  //     String? appartamento_str =
+  //         sp.getString('appartamento_temp_${condominio.appartamenti![i].id}');
+  //     if (appartamento_str != null) {
+  //       AppartamentoModel appartamento =
+  //           AppartamentoModel.fromJson(jsonDecode(appartamento_str));
+  //       print("prova ${appartamento.toJson()}");
+  //       condominio.appartamenti![i] =
+  //           appartamento;
+  //     }
+  //   }
 
-    print("condominio giusto${condominio.toJson()}");
+  //   print("condominio giusto${condominio.toJson()}");
 
-    final response = await ApiRequests.sendAuthRequest(
-        'condominio/${condominio.idAnaCondominio}/save',
-        'POST',
-        condominio.toJson());
+  //   final response = await ApiRequests.sendAuthRequest(
+  //       'condominio/${condominio.idAnaCondominio}/save',
+  //       'POST',
+  //       condominio.toJson());
 
-    if (response != null) {
-      return true;
-    }
+  //   if (response != null) {
+  //     return true;
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 }

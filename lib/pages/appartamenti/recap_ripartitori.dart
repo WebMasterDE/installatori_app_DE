@@ -44,7 +44,10 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
 
   Future<List<RipartitoriModel>> getRipartitori() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String? ap = sp.getString('appartamento_temp_$_idAppartamento');
+    String? ap;
+
+    ap = sp.getString('appartamento_temp_$_idAppartamento');
+
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));

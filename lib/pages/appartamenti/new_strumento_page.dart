@@ -62,8 +62,6 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   String _saveNota = ""; //serve per salvare la nota prima della modifica
 
-
-
   @override
   void initState() {
     super.initState();
@@ -126,7 +124,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
     }
 
     _matricolaController.text = ripartitore.matricola;
-    _descrizioneController.text = ripartitore.descrizione;
+    _descrizioneController.text = ripartitore.descrizione ?? '';
     _vanoController.text = ripartitore.vano.toString();
     _tipologiaController.text = ripartitore.tipologia!;
     _altezzaController.text =
@@ -137,13 +135,15 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         ripartitore.profondita.toString().replaceAll('.', ',');
     _nElementiController.text =
         ripartitore.numeroElementi.toString().replaceAll('.', ',');
-    final File newImage = File(ripartitore.pathImage);
-    _pathUploadImage = ripartitore.pathImage;
-    _saveNota = ripartitore.note!;
+    if (ripartitore.pathImage != null) {
+      final File newImage = File(ripartitore.pathImage!);
+      _pathUploadImage = ripartitore.pathImage;
+      _saveNota = ripartitore.note!;
 
-    setState(() {
-      _uploadImage = newImage;
-    });
+      setState(() {
+        _uploadImage = newImage;
+      });
+    }
   }
 
   @override
@@ -161,16 +161,19 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         ),
         body: Column(
           children: [
-            if(_modifica)
-                        CustomHorizontalStepper(
-              steps: const ["1", "2",],
-              currentStep: 1,
-            ),
-            if(!_modifica)
-            CustomHorizontalStepper(
-              steps: const ["1", "2", "3", "4"],
-              currentStep: 2,
-            ),
+            if (_modifica)
+              CustomHorizontalStepper(
+                steps: const [
+                  "1",
+                  "2",
+                ],
+                currentStep: 1,
+              ),
+            if (!_modifica)
+              CustomHorizontalStepper(
+                steps: const ["1", "2", "3", "4"],
+                currentStep: 2,
+              ),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -191,42 +194,6 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                         SizedBox(
                           height: 10,
                         ),
-                        //TODO: verificare se necessario
-                        /*Text('Tipologia ripartitori',
-                            style: Theme.of(context).textTheme.labelSmall),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(spacing: 2, children: [
-                          Checkbox(
-                            value: _riscaldamento,
-                            onChanged: (value) {
-                              setState(() {
-                                _riscaldamento = value ?? false;
-                              });
-                            },
-                            activeColor: CustomColors.iconColor,
-                          ),
-                          Text("Riscaldamento")
-                        ]),
-                        Row(spacing: 2, children: [
-                          Checkbox(
-                            value: _raffrescamento,
-                            onChanged: (value) => {
-                              setState(() {
-                                _raffrescamento = value ?? false;
-                              })
-                            },
-                            activeColor: CustomColors.iconColor,
-                          ),
-                          Text("Raffrescamento")
-                        ]),
-                        if (_isNotCompletedCheck)
-                          Text('Campo necessario',
-                              style: Theme.of(context).textTheme.displaySmall),
-                        SizedBox(
-                          height: 20,
-                        ),*/
                         Row(
                           children: [
                             Expanded(
@@ -295,7 +262,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                             controller: _tipologiaController,
                             required: true,
                           ),
-                        if (_selectedStrumento == "riscaldamento")
+                        if (_selectedStrumento == "Ripartitori Riscaldamento")
                           Row(
                             spacing: 5,
                             children: [
@@ -317,7 +284,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                               ))
                             ],
                           ),
-                        if (_selectedStrumento == "riscaldamento")
+                        if (_selectedStrumento == "Ripartitori Riscaldamento")
                           Row(
                             spacing: 5,
                             children: [
@@ -501,8 +468,8 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             break;
         }
 
-        _pathUploadImage =
-            path.join(appDir.path, '${_idAnaCondominio}_${_idAppartamento}_${nomeTipologia}_$timestamp.${image.path.split('.').last.toLowerCase()}');
+        _pathUploadImage = path.join(appDir.path,
+            '${_idAnaCondominio}_${_idAppartamento}_${nomeTipologia}_$timestamp.${image.path.split('.').last.toLowerCase()}');
 
         final File newImage = await File(image.path).copy(_pathUploadImage!);
 
@@ -531,7 +498,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
-        /*if (_riscaldamento || _raffrescamento) {
+      /*if (_riscaldamento || _raffrescamento) {
           setState(() {
             _isNotCompletedCheck = false;
           });
@@ -540,7 +507,6 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             _isNotCompletedCheck = true;
           });
         }*/
-      
 
       if (_uploadImage == null) {
         setState(() {
@@ -558,10 +524,20 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             descrizione: _descrizioneController.text,
             vano: int.parse(_vanoController.text),
             tipologia: _tipologiaController.text,
-            altezza: _altezzaController.text.isNotEmpty ? double.parse(_altezzaController.text.replaceAll(',', '.')) : null,
-            larghezza: _larghezzaController.text.isNotEmpty ? double.parse(_larghezzaController.text.replaceAll(',', '.')) : null,
-            profondita: _profonditaController.text.isNotEmpty ? double.parse(_profonditaController.text.replaceAll(',', '.')) : null,
-            numeroElementi: _nElementiController.text.isNotEmpty ? int.parse(_nElementiController.text.replaceAll(',', '.')) : null,
+            altezza: _altezzaController.text.isNotEmpty
+                ? double.parse(_altezzaController.text.replaceAll(',', '.'))
+                : null,
+            larghezza: _larghezzaController.text.isNotEmpty
+                ? double.parse(_larghezzaController.text.replaceAll(',', '.'))
+                : null,
+            profondita: _profonditaController.text.isNotEmpty
+                ? double.parse(_profonditaController.text.replaceAll(',', '.'))
+                : null,
+            numeroElementi: _nElementiController.text.isNotEmpty
+                ? int.parse(_nElementiController.text.replaceAll(',', '.'))
+                : null,
+            //TODO inserire campo nel form!!
+            produttore: 'produttore',
             pathImage: _pathUploadImage!);
 
         print(jsonEncode(_appartamento));

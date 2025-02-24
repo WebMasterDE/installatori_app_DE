@@ -2,12 +2,12 @@ import 'package:installatori_de/models/ripartitori_model.dart';
 
 class AppartamentoModel {
   int? id;
-  late String interno;
-  late int piano;
-  late String scala;
+  late String? interno;
+  late int? piano;
+  late String? scala;
   String? pathUploadImage;
-  late String nome;
-  late String cognome;
+  late String? nome;
+  late String? cognome;
   late String? mail;
   int? numeroRipartitoriRiscaldamento; //viene inserito a 1 in caso di contatori diretti
   String? note;
@@ -18,12 +18,12 @@ class AppartamentoModel {
 
   AppartamentoModel({
     this.id,
-    required this.interno,
-    required this.piano,
-    required this.scala,
+    this.interno,
+    this.piano,
+    this.scala,
     this.pathUploadImage,
-    required this.nome,
-    required this.cognome,
+    this.nome,
+    this.cognome,
     this.mail,
     this.note,
     required this.numeroRipartitoriRiscaldamento,
