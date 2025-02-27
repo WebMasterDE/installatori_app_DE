@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
 import 'package:installatori_de/components/stepper.dart';
+import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/pages/appartamenti/nota_ripartitori.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -29,8 +30,6 @@ class NewStrumentoPage extends StatefulWidget {
 }
 
 class _NewStrumentoPageState extends State<NewStrumentoPage> {
-  bool _riscaldamento = false;
-  bool _raffrescamento = false;
 
   File? _uploadImage;
   String? _pathUploadImage;
@@ -45,11 +44,10 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
   final TextEditingController _profonditaController = TextEditingController();
   final TextEditingController _nElementiController = TextEditingController();
 
-  bool _isNotCompletedCheck = false;
   bool _isNotCompletedImage = false;
 
   int _idAppartamento = 0;
-  String _selectedStrumento = '';
+  late CondominioStrumenti _selectedStrumento;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -90,19 +88,19 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
   void initializeModifica() async {
     RipartitoriModel ripartitore;
     switch (_selectedStrumento) {
-      case "Contatore Freddo":
+      case CondominioStrumenti.contatoreFreddo:
         ripartitore = _appartamento!.raffrescamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         break;
-      case "Contatore Caldo/Freddo":
+      case CondominioStrumenti.contatoreCaldoFreddo:
         ripartitore = _appartamento!.riscaldamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         break;
-      case "Contatore Caldo":
+      case CondominioStrumenti.contatoreCaldo:
         ripartitore = _appartamento!.riscaldamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         break;
-      case "Ripartitori Riscaldamento":
+      case CondominioStrumenti.ripartitoriRiscaldamento:
         ripartitore = _appartamento!.riscaldamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         // TODO questi dati sono inseribili solo nel caso dei ripartitori riscaldamento, da scommentare quando modifichiamo i model
@@ -111,16 +109,14 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         // _profonditaController.text =ripartitore.profondita.toString().replaceAll('.', ',');
         // _nElementiController.text =ripartitore.numeroElementi.toString().replaceAll('.', ',');
         break;
-      case "Contatore Acqua Calda":
+      case CondominioStrumenti.contatoreAcquaCalda:
         ripartitore = _appartamento!.acquaCalda!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         break;
-      case "Contatore Acqua Fredda":
+      case CondominioStrumenti.contatoreAcquaFredda:
         ripartitore = _appartamento!.acquaFredda!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
         break;
-      default:
-        throw Exception("Invalid strumento selected");
     }
 
     _matricolaController.text = ripartitore.matricola;
@@ -256,13 +252,13 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                           },
                           textInputType: TextInputType.number,
                         ),
-                        if (_selectedStrumento == "riscaldamento")
+                        if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento)
                           CustomTextfield(
                             text: "Tipologia",
                             controller: _tipologiaController,
                             required: true,
                           ),
-                        if (_selectedStrumento == "Ripartitori Riscaldamento")
+                        if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento)
                           Row(
                             spacing: 5,
                             children: [
@@ -284,7 +280,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                               ))
                             ],
                           ),
-                        if (_selectedStrumento == "Ripartitori Riscaldamento")
+                        if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento)
                           Row(
                             spacing: 5,
                             children: [
@@ -451,19 +447,19 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         String nomeTipologia = '';
 
         switch (_selectedStrumento) {
-          case "Contatore Freddo":
+          case CondominioStrumenti.contatoreFreddo:
             nomeTipologia = 'raffrescamento';
             break;
-          case "Contatore Caldo/Freddo":
+          case CondominioStrumenti.contatoreCaldoFreddo:
             nomeTipologia = 'riscaldamento_raffrescamento';
             break;
-          case "Contatore Caldo" || "Ripartitori Riscaldamento":
+          case CondominioStrumenti.contatoreCaldo || CondominioStrumenti.ripartitoriRiscaldamento:
             nomeTipologia = 'riscaldamento';
             break;
-          case "Contatore Acqua Calda":
+          case CondominioStrumenti.contatoreAcquaCalda:
             nomeTipologia = 'acquaCalda';
             break;
-          case "Contatore Acqua Fredda":
+          case CondominioStrumenti.contatoreAcquaFredda:
             nomeTipologia = 'acquaFredda';
             break;
         }
@@ -498,16 +494,6 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
 
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
-      /*if (_riscaldamento || _raffrescamento) {
-          setState(() {
-            _isNotCompletedCheck = false;
-          });
-        } else {
-          setState(() {
-            _isNotCompletedCheck = true;
-          });
-        }*/
-
       if (_uploadImage == null) {
         setState(() {
           _isNotCompletedImage = true;
@@ -518,7 +504,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
         });
       }
 
-      if (/*(_riscaldamento || _raffrescamento) && */ _uploadImage != null) {
+      if (_uploadImage != null) {
         RipartitoriModel ripartitore = RipartitoriModel(
             matricola: _matricolaController.text,
             descrizione: _descrizioneController.text,
@@ -536,14 +522,14 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             numeroElementi: _nElementiController.text.isNotEmpty
                 ? int.parse(_nElementiController.text.replaceAll(',', '.'))
                 : null,
-            //TODO inserire campo nel form!!
+            //TODO: inserire campo nel form!!
             produttore: 'produttore',
             pathImage: _pathUploadImage!);
 
         print(jsonEncode(_appartamento));
 
         switch (_selectedStrumento) {
-          case "Contatore Freddo":
+          case CondominioStrumenti.contatoreFreddo:
             int indexra = _appartamento!.raffrescamento!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (indexra != -1) {
@@ -555,7 +541,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             }
             _appartamento!.raffrescamento!.completato = true;
             break;
-          case "Contatore Caldo/Freddo":
+          case CondominioStrumenti.contatoreCaldoFreddo:
             int indexra = _appartamento!.raffrescamento!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (indexra != -1) {
@@ -578,7 +564,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             _appartamento!.riscaldamento!.completato = true;
             _appartamento!.raffrescamento!.completato = true;
             break;
-          case "Contatore Caldo":
+          case CondominioStrumenti.contatoreCaldo:
             int index = _appartamento!.riscaldamento!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (index != -1) {
@@ -590,7 +576,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             }
             _appartamento!.riscaldamento!.completato = true;
             break;
-          case "Ripartitori Riscaldamento":
+          case CondominioStrumenti.ripartitoriRiscaldamento:
             int index = _appartamento!.riscaldamento!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (index != -1) {
@@ -601,7 +587,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
               _appartamento!.riscaldamento!.ripartitori!.add(ripartitore);
             }
             break;
-          case "Contatore Acqua Calda":
+          case CondominioStrumenti.contatoreAcquaCalda:
             int index = _appartamento!.acquaCalda!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (index != -1) {
@@ -613,7 +599,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             }
             _appartamento!.acquaCalda!.completato = true;
             break;
-          case "Contatore Acqua Fredda":
+          case CondominioStrumenti.contatoreAcquaFredda:
             int indexri = _appartamento!.acquaFredda!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (indexri != -1) {

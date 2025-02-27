@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/components/custom_textField.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
@@ -32,7 +33,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
   int _idAppartamento = 0;
   AppartamentoModel? _appartamento;
   int _selectedIndex = -1;
-  String _selectedStrumento = "";
+  CondominioStrumenti? _selectedStrumento;
 
   final TextEditingController _numeroRipartitoriController =
       TextEditingController();
@@ -47,10 +48,30 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
     _idAnaCondominio = widget.arguments.data['id'];
     _idAppartamento = widget.arguments.data['idAppartamento'];
 
-    _strumentiCondominio =  CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
+    _strumentiCondominio = getStrumentiCondominio(_idAnaCondominio);
 
     getAppartamento();
 
+  }
+
+  Future<List<CondominioStrumenti>> getStrumentiCondominio(int idAnaCondominio) async {
+
+      var sh = await SharedPreferences.getInstance();
+      String? listCondominiString = sh.getString('condomini');
+
+      if(listCondominiString != null){
+        List<CondominioModel> condominiList = List.from(jsonDecode(listCondominiString)).map((condominio) {
+            return CondominioModel.fromJson(condominio);
+        }).toList();
+
+        for(var condominio in condominiList){
+          if(condominio.idAnaCondominio == idAnaCondominio){
+            return condominio.strumenti;
+          }
+        }
+      }
+
+      return List.empty();
   }
 
   void getAppartamento() async {
@@ -60,7 +81,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
 
-      var strumenti = await CondominiProvider().getStrumentiCondomini(_idAnaCondominio, context);
+      List<CondominioStrumenti> strumenti = await getStrumentiCondominio(_idAnaCondominio);
 
       int countActiveService = strumenti.length;
 
@@ -93,6 +114,23 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
           });
         }
       }
+    }
+  }
+
+  String getNameOfStrumento(CondominioStrumenti strumento){
+    switch(strumento){
+      case CondominioStrumenti.ripartitoriRiscaldamento:
+        return "Ripartitori riscaldamento";
+      case CondominioStrumenti.contatoreCaldo:
+        return "Contatore caldo";
+      case CondominioStrumenti.contatoreFreddo:
+        return "Contatore freddo";
+      case CondominioStrumenti.contatoreCaldoFreddo:
+        return "Contatore caldo/freddo";
+      case CondominioStrumenti.contatoreAcquaCalda:
+        return "Contatore acqua calda";
+      case CondominioStrumenti.contatoreAcquaFredda:
+        return "Contatore acqua fredda";
     }
   }
 
@@ -143,14 +181,14 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                       
                       bool isDisabled = false;
                       if (_appartamento != null) {
-                        switch (strumento['nome_servizio']) {
-                          case "Contatore Freddo":
+                        switch (strumento) {
+                          case CondominioStrumenti.contatoreFreddo:
                             if (_appartamento!.raffrescamento != null) {
                               isDisabled =
                                   _appartamento!.raffrescamento!.completato;
                             }
                             break;
-                          case "Contatore Caldo/Freddo":
+                          case CondominioStrumenti.contatoreCaldoFreddo:
                             if (_appartamento!.riscaldamento != null &&
                                 _appartamento!.raffrescamento != null) {
                               isDisabled =
@@ -158,25 +196,25 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                                       _appartamento!.raffrescamento!.completato;
                             }
                             break;
-                          case "Contatore Caldo":
+                          case CondominioStrumenti.contatoreCaldo:
                             if (_appartamento!.riscaldamento != null) {
                               isDisabled =
                                   _appartamento!.riscaldamento!.completato;
                             }
                             break;
-                          case "Ripartitori Riscaldamento":
+                          case CondominioStrumenti.ripartitoriRiscaldamento:
                             if (_appartamento!.riscaldamento != null) {
                               isDisabled =
                                   _appartamento!.riscaldamento!.completato;
                             }
                             break;
-                          case "Contatore Acqua Calda":
+                          case CondominioStrumenti.contatoreAcquaCalda:
                             if (_appartamento!.acquaCalda != null) {
                               isDisabled =
                                   _appartamento!.acquaCalda!.completato;
                             }
                             break;
-                          case "Contatore Acqua Fredda":
+                          case CondominioStrumenti.contatoreAcquaFredda:
                             if (_appartamento!.acquaFredda != null) {
                               isDisabled =
                                   _appartamento!.acquaFredda!.completato;
@@ -185,7 +223,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                         }
                       }
 
-                      String nomeServizio = strumento['nome_servizio'];
+                      CondominioStrumenti nomeServizio = strumento;
 
                       Color cardColor = isDisabled
                           ? Colors.grey
@@ -194,7 +232,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                               : Colors.white);
 
                       IconData iconData;
-                      if (nomeServizio == "Ripartitori Riscaldamento") {
+                      if (nomeServizio == CondominioStrumenti.ripartitoriRiscaldamento) {
                         iconData = HeroiconsSolid.fire;
                       } else {
                         iconData = HeroiconsSolid.wrenchScrewdriver;
@@ -205,7 +243,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                         child: ListTile(
                           leading:
                               Icon(iconData, color: CustomColors.iconColor),
-                          title: Text(nomeServizio),
+                          title: Text(getNameOfStrumento(nomeServizio)),
                           onTap: isDisabled
                               ? null
                               : () {
@@ -218,7 +256,7 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
                       );
                     }).toList());
 
-                    if (_selectedStrumento == "Ripartitori Riscaldamento") {
+                    if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento) {
                       listViewChildren.addAll([
                         SizedBox(height: 20),
                         Text(
@@ -260,40 +298,40 @@ class _SelezioneStrumentiPageState extends State<SelezioneStrumentiPage> {
 
   void _stepSucc() async {
     if (_selectedIndex != -1 && _appartamento != null) {
-      if (_selectedStrumento == "Ripartitori Riscaldamento" &&
+      if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento &&
           _numeroRipartitoriController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
                 Text('Inserire il numero dei ripartitori del riscaldamento')));
         return;
       }
-      switch (_selectedStrumento) {
-        case "Contatore Freddo":
+      switch (_selectedStrumento!) {
+        case CondominioStrumenti.contatoreFreddo:
           _appartamento!.raffrescamento =
               StatoRipartitori(completato: false, ripartitori: []);
           break;
-        case "Contatore Caldo/Freddo":
+        case CondominioStrumenti.contatoreCaldoFreddo:
           _appartamento!.riscaldamento =
               StatoRipartitori(completato: false, ripartitori: []);
 
           _appartamento!.raffrescamento =
               StatoRipartitori(completato: false, ripartitori: []);
           break;
-        case "Contatore Caldo":
+        case CondominioStrumenti.contatoreCaldo:
           _appartamento!.riscaldamento =
               StatoRipartitori(completato: false, ripartitori: []);
           break;
-        case "Ripartitori Riscaldamento":
+        case CondominioStrumenti.ripartitoriRiscaldamento:
           _appartamento!.riscaldamento =
               StatoRipartitori(completato: false, ripartitori: []);
           _appartamento!.numeroRipartitoriRiscaldamento =
               int.parse(_numeroRipartitoriController.text);
           break;
-        case "Contatore Acqua Calda":
+        case CondominioStrumenti.contatoreAcquaCalda:
           _appartamento!.acquaCalda =
               StatoRipartitori(completato: false, ripartitori: []);
           break;
-        case "Contatore Acqua Fredda":
+        case CondominioStrumenti.contatoreAcquaFredda:
           _appartamento!.acquaFredda =
               StatoRipartitori(completato: false, ripartitori: []);
           break;

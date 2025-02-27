@@ -15,6 +15,7 @@ class AppartamentoModel {
   StatoRipartitori? riscaldamento;
   StatoRipartitori? acquaCalda;
   StatoRipartitori? acquaFredda;
+  bool savedOnDb = false;
 
   AppartamentoModel({
     this.id,
@@ -31,24 +32,25 @@ class AppartamentoModel {
     StatoRipartitori? riscaldamento,
     StatoRipartitori? acquaCalda,
     StatoRipartitori? acquaFredda,
+    savedOnDb = false
   });
 
   AppartamentoModel.fromJson(Map<String, dynamic> json) {
-      id= json['id'];
+      id= json['id'] != null ? int.parse(json['id'].toString()) : null;
       interno= json['interno'];
-      piano= json['piano'];
+      piano= json['piano'] != null ? int.parse(json['piano'].toString()) : null;
       scala= json['scala'];
       pathUploadImage= json['pathUploadImage'];
-      //TODO: pensare a come gestire più inquilini
       nome= json['nome'];
       cognome= json['cognome'];
       mail= json['mail'];
       note= json['note'];
-      numeroRipartitoriRiscaldamento = json['numeroRipartitoriRiscaldamento'];
+      numeroRipartitoriRiscaldamento = json['numeroRipartitoriRiscaldamento'] != null ? int.parse(json['numeroRipartitoriRiscaldamento'].toString()) : null;
       raffrescamento= json['raffrescamento'] != null ? StatoRipartitori.fromJson(json['raffrescamento']) : null;
       riscaldamento= json['riscaldamento'] != null ? StatoRipartitori.fromJson(json['riscaldamento']) : null;
       acquaCalda= json['acquaCalda'] != null ? StatoRipartitori.fromJson(json['acquaCalda']) : null;
       acquaFredda= json['acquaFredda'] != null ? StatoRipartitori.fromJson(json['acquaFredda']) : null;
+      savedOnDb = json['savedOnDb'];
   }
   
 
@@ -67,7 +69,8 @@ class AppartamentoModel {
       'raffrescamento': raffrescamento?.toJson(),
       'riscaldamento': riscaldamento?.toJson(),
       'acquaCalda': acquaCalda?.toJson(),
-      'acquaFredda': acquaFredda?.toJson()
+      'acquaFredda': acquaFredda?.toJson(),
+      'savedOnDb': savedOnDb
     };
   }
 }
@@ -93,7 +96,7 @@ class StatoRipartitori {
   Map<String, dynamic> toJson() {
     return {
       'completato': completato,
-      'ripartitori': ripartitori != null ? (ripartitori!.map((e) => e.toJson()).toList()) : List.empty(),
+      'ripartitori': ripartitori != null ? (ripartitori!.map((e) => e.toJson()).toList()) : [],
     };
   }
 }

@@ -23,28 +23,32 @@ class SaveDataProvider extends ChangeNotifier {
 
   Future<bool> saveData(
       BuildContext context, int idAnaCondominio, int idAppartamento) async {
+
     this.idAnaCondominio = idAnaCondominio;
     this.idAppartamento = idAppartamento;
     this.context = context;
+
+    saveAppartamentoToLocal(idAnaCondominio, idAppartamento);
+
     bool hasConnection = await InternetConnection().hasInternetAccess;
 
     if (hasConnection) {
-      return await saveToDb(idAnaCondominio, idAppartamento);
+      return await saveToDb();
     } else {
       if (!_isListening) {
-        startConnectionListener(idAnaCondominio, idAppartamento);
+        startConnectionListener();
       }
       return false;
     }
   }
 
-  void startConnectionListener(int idAnaCondominio, int idAppartamento) {
+  void startConnectionListener() {
     _isListening = true;
     listener = InternetConnection()
         .onStatusChange
         .listen((InternetStatus status) async {
       if (status == InternetStatus.connected) {
-        bool isSaved = await saveToDb(idAnaCondominio, idAppartamento);
+        bool isSaved = await saveToDb();
         if (isSaved) {
           stopListener();
         }
@@ -64,7 +68,7 @@ class SaveDataProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<bool> saveToDb(int idAnaCondominio, int idAppartamento) async {
+  Future<bool> saveAppartamentoToLocal(int idAnaCondominio, int idAppartamento) async {
     final sp = await SharedPreferences.getInstance();
     String? appartamentoTemp =
         sp.getString('appartamento_temp_$idAppartamento');
@@ -105,32 +109,53 @@ class SaveDataProvider extends ChangeNotifier {
                 sp.remove('appartamento_temp_$idAppartamento');
               }
             } else {
+              condominio.appartamenti = [];
               condominio.appartamenti!.add(appartamento);
               sp.remove('appartamento_temp_$idAppartamento');
             }
           }
         }
-
-        sp.setString('condomini', jsonEncode(condominiList));
+        List<Map<String, dynamic>> jsonList = condominiList.map((condominio) => condominio.toJson()).toList();
+        sp.setString('condomini', jsonEncode(jsonList));
 
         print('condomini finale ${sp.getString("condomini")}');
 
-        for (var condominio in condominiList) {
-          saveCondominio(condominio);
-        }
+        return true;
+                
       }
     }
+    return false;
+  }
 
-    return true;
+
+  Future<bool> saveToDb() async {
+    final sp = await SharedPreferences.getInstance();
+
+    String? condominiString = sp.getString('condomini');
+
+    if(condominiString != null){
+      List<CondominioModel> condominiList = List.from(jsonDecode(condominiString)).map((condominio) {
+                                              return CondominioModel.fromJson(condominio);
+                                            }).toList();
+      for(var condominio in condominiList){
+        saveCondominio(condominio);
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   Future<bool> saveCondominio(CondominioModel condominio) async {
     List<AppartamentoModel> appartamentiToRemove = [];
 
     for (var appartamento in condominio.appartamenti!) {
-      bool result = await saveAppartamentoAndStrumenti(appartamento);
-      if (result) {
-        appartamentiToRemove.add(appartamento);
+      if(!appartamento.savedOnDb){
+        bool result = await saveAppartamentoAndStrumenti(appartamento);
+        if (result) {
+          appartamentiToRemove.add(appartamento);
+        }
       }
     }
 
@@ -148,11 +173,20 @@ class SaveDataProvider extends ChangeNotifier {
             cond.appartamenti?.removeWhere((app) =>
                 appartamentiToRemove.any((toRemove) => toRemove.id == app.id));
           }
+
+          if (cond.appartamenti == null || cond.appartamenti!.isEmpty) {
+              condominiList.remove(cond);
+          }
         }
 
-        await sp.setString('condomini', jsonEncode(condominiList));
+        print("condominioooo ${jsonEncode(condominiList)}");
+
+        List<Map<String, dynamic>> jsonList = condominiList.map((condominio) => condominio.toJson()).toList();
+        await sp.setString('condomini', jsonEncode(jsonList));
       }
     }
+
+    print("fuorii");
 
     return true;
   }
@@ -254,7 +288,8 @@ class SaveDataProvider extends ChangeNotifier {
       Navigator.pushNamedAndRemoveUntil(context!, '/', (route) => false);
       return false;
     }
-
-    return result['success'];
+    print("result saveAppartamentoAndStrumenti ${result['success']}");
+    print(result);
+    return result['success'] ?? false;
   }
 }

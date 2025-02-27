@@ -360,10 +360,112 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
   void _stepSucc() async {
     if (_formKey.currentState!.validate()) {
       final sharedPref = await SharedPreferences.getInstance();
+      var condominiListString = sharedPref.getString('condomini');
 
-      var condominiList = sharedPref.getString('condomini');
+      int? idAppartamentoFrom = sharedPref.getInt('id_appartamento_from');
 
-      List<CondominioModel> cmList = [];
+      CondominioModel? condominio;
+      int idAppartamento = 0;
+
+      List<CondominioModel>? condominiList;
+
+      if(condominiListString != null){
+        condominiList = List.from(jsonDecode(condominiListString)).map((condominio) {
+          return CondominioModel.fromJson(condominio);
+        }).toList();
+
+        for(var c in condominiList){
+          if(c.idAnaCondominio == _idAnaCondominio){
+            condominio = c;
+
+            List<AppartamentoModel>? appartamenti = c.appartamenti;
+
+            if (appartamenti != null && appartamenti.isNotEmpty && idAppartamentoFrom == null) {
+              idAppartamento = appartamenti.last.id! + 1;
+            }
+          }
+        }
+      }
+
+      AppartamentoModel am = AppartamentoModel(
+        id: idAppartamentoFrom ?? idAppartamento,
+        interno: _internoController.text,
+        scala: _scalaController.text,
+        piano: int.parse(_pianoController.text),
+        pathUploadImage: _pathUploadImage,
+        nome: _nomeController.text,
+        cognome: _cognomeController.text,
+        mail: _mailController.text,
+        numeroRipartitoriRiscaldamento: 1,
+      );
+
+      if (_modifica) {
+        am.id = _appartamento!.id;
+        am.riscaldamento = _appartamento!.riscaldamento;
+        am.raffrescamento = _appartamento!.raffrescamento;
+        am.acquaCalda = _appartamento!.acquaCalda;
+        am.acquaFredda = _appartamento!.acquaFredda;
+        am.numeroRipartitoriRiscaldamento = _appartamento!.numeroRipartitoriRiscaldamento;
+
+        idAppartamentoFrom = _appartamento!.id;
+        idAppartamento = _appartamento!.id!;
+        print("provaaaa${am.toJson()}");
+      }
+
+
+      if (idAppartamentoFrom == null) {
+
+        if(condominiList != null){
+          if(condominio != null){
+            if(condominio.appartamenti != null){
+                condominio.appartamenti!.add(am);
+            }else{
+              condominio.appartamenti = List<AppartamentoModel>.empty();
+              condominio.appartamenti!.add(am);
+            }
+          }
+        }
+        
+      } else {
+        List<AppartamentoModel> appartamenti = condominio!.appartamenti!;
+
+        for (var appartamento in appartamenti) {
+          if (appartamento.id == idAppartamentoFrom) {
+            appartamento = am;
+          }
+        }
+      }
+
+      List<Map<String, dynamic>> jsonList = condominiList!.map((condominio) => condominio.toJson()).toList();
+      await sharedPref.setString('condomini', jsonEncode(jsonList));
+
+      sharedPref.setString('appartamento_temp_$idAppartamento', jsonEncode(am.toJson()));
+
+      print('condominio ${jsonDecode(sharedPref.getString('condomini')!)}');
+      print('appartamento_temp ${jsonDecode(sharedPref.getString('appartamento_temp_$idAppartamento')!)}');
+
+      sharedPref.remove('id_appartamento_from');
+
+      if(_modifica){
+        Navigator.pushNamed(context, "/modifica_appartamento",
+            arguments: ModificaAppartamentoPageArgs(data: {
+              'id': _idAnaCondominio,
+              'idAppartamento': idAppartamento
+            }));
+            return;
+      }
+
+      Navigator.pushNamed(context, "/selezione_strumenti",
+          arguments: SelezioneStrumentiPageArgs(data: {
+            'id': _idAnaCondominio,
+            'idAppartamento': idAppartamento
+          })
+      );
+
+
+
+
+      /*List<CondominioModel> cmList = [];
 
       int idAppartamento = 0;
 
@@ -462,20 +564,20 @@ class _NewAppartamentoPageState extends State<NewAppartamentoPage> {
 
       sharedPref.remove('id_appartamento_from');
 
-if(_modifica){
-  Navigator.pushNamed(context, "/modifica_appartamento",
-      arguments: ModificaAppartamentoPageArgs(data: {
-        'id': _idAnaCondominio,
-        'idAppartamento': idAppartamento
-      }));
-      return;
-}
+      if(_modifica){
+        Navigator.pushNamed(context, "/modifica_appartamento",
+            arguments: ModificaAppartamentoPageArgs(data: {
+              'id': _idAnaCondominio,
+              'idAppartamento': idAppartamento
+            }));
+            return;
+      }
       Navigator.pushNamed(context, "/selezione_strumenti",
           arguments: SelezioneStrumentiPageArgs(data: {
             'id': _idAnaCondominio,
             'idAppartamento': idAppartamento
           }));
-
+    */
 
     }
   }

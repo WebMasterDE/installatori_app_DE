@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/utils/api_requests.dart';
@@ -9,34 +10,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppartamentiProvider extends ChangeNotifier {
 
-  Future<List<AppartamentoModel>> getAppartamenti(int idAnaCondominio) async {
+  Future<List<AppartamentoModel>> getAppartamenti(int idAnaCondominio, BuildContext context) async {
 
-    List<AppartamentoModel> appartamenti;
+    List<AppartamentoModel> appartamenti = [];
 
-    var response = await ApiRequests.sendAuthRequest('condominio/$idAnaCondominio/appartamenti', 'GET', {});
-
-    if(response != null && response['error'] == false){
+    //var response = await ApiRequests.sendAuthRequest('condominio/$idAnaCondominio/appartamenti', 'GET', {});
+    
+    /*if (response['errore_double_token'] == true) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      return List.empty();
+    }*/
+    
+    /*if(response != null && response['error'] == false){
       appartamenti = List.from(response['data']).map((appartamento){
-        // print('provider${appartamento.toString()}');
         return AppartamentoModel.fromJson(appartamento);
-      }).toList();
+      }).toList();*/
 
       var sp = await SharedPreferences.getInstance();
-      String? condominiString = sp.getString('condomini');
+      String? condominiListString = sp.getString('condomini');
 
-      print(appartamenti.toString());
+      if (condominiListString != null) {
 
-      if (condominiString != null) {
-        List<dynamic> condominiList = jsonDecode(condominiString);
-        for (var condominio in condominiList) {
-          if(condominio['idAnaCondominio'] == idAnaCondominio){
-            CondominioModel cm = CondominioModel.fromJson(condominio);
-            if(cm.appartamenti != null && cm.appartamenti!.isNotEmpty){
-              List<AppartamentoModel>? listAp = cm.appartamenti;
-              for (var appartamento in listAp!) {
+        List<CondominioModel> condominiList = List.from(jsonDecode(condominiListString)).map((condominio) {
+          return CondominioModel.fromJson(condominio);
+        }).toList();
+
+        for(var condominio in condominiList){
+          if(condominio.idAnaCondominio == idAnaCondominio && condominio.appartamenti != null && condominio.appartamenti!.isNotEmpty){
+            for (var appartamento in condominio.appartamenti!) {
                 appartamenti.add(appartamento);
               }
-            }
           }
         }
       }
@@ -44,9 +47,9 @@ class AppartamentiProvider extends ChangeNotifier {
       return appartamenti;
 
 
-    }else{
+    /*}else{
       return List.empty();
-    }
+    }*/
 
   }
 
