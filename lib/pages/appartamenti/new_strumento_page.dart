@@ -105,11 +105,10 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
       case "Ripartitori Riscaldamento":
         ripartitore = _appartamento!.riscaldamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaModifica);
-        // TODO questi dati sono inseribili solo nel caso dei ripartitori riscaldamento, da scommentare quando modifichiamo i model
-        // _altezzaController.text =ripartitore.altezza.toString().replaceAll('.', ',');
-        // _larghezzaController.text =ripartitore.larghezza.toString().replaceAll('.', ',');
-        // _profonditaController.text =ripartitore.profondita.toString().replaceAll('.', ',');
-        // _nElementiController.text =ripartitore.numeroElementi.toString().replaceAll('.', ',');
+        _altezzaController.text =ripartitore.altezza.toString().replaceAll('.', ',');
+        _larghezzaController.text =ripartitore.larghezza.toString().replaceAll('.', ',');
+        _profonditaController.text =ripartitore.profondita.toString().replaceAll('.', ',');
+        _nElementiController.text =ripartitore.numeroElementi.toString().replaceAll('.', ',');
         break;
       case "Contatore Acqua Calda":
         ripartitore = _appartamento!.acquaCalda!.ripartitori!
@@ -256,7 +255,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
                           },
                           textInputType: TextInputType.number,
                         ),
-                        if (_selectedStrumento == "riscaldamento")
+                        if (_selectedStrumento == "Ripartitori Riscaldamento")
                           CustomTextfield(
                             text: "Tipologia",
                             controller: _tipologiaController,
@@ -547,6 +546,7 @@ class _NewStrumentoPageState extends State<NewStrumentoPage> {
             int indexra = _appartamento!.raffrescamento!.ripartitori!
                 .indexWhere((rip) => rip.matricola == _matricolaModifica);
             if (indexra != -1) {
+              
               ripartitore.note = _saveNota;
               _appartamento!.raffrescamento!.ripartitori![indexra] =
                   ripartitore;

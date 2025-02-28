@@ -6,6 +6,7 @@ class AppartamentoModel {
   late int? piano;
   late String? scala;
   String? pathUploadImage;
+  int? idUtente;
   late String? nome;
   late String? cognome;
   late String? mail;
@@ -26,7 +27,8 @@ class AppartamentoModel {
     this.cognome,
     this.mail,
     this.note,
-    required this.numeroRipartitoriRiscaldamento,
+    this.numeroRipartitoriRiscaldamento,
+    this.idUtente,
     StatoRipartitori? raffrescamento,
     StatoRipartitori? riscaldamento,
     StatoRipartitori? acquaCalda,
@@ -39,11 +41,11 @@ class AppartamentoModel {
       piano= json['piano'];
       scala= json['scala'];
       pathUploadImage= json['pathUploadImage'];
-      //TODO: pensare a come gestire più inquilini
       nome= json['nome'];
       cognome= json['cognome'];
       mail= json['mail'];
       note= json['note'];
+      idUtente = json['idUtente'];
       numeroRipartitoriRiscaldamento = json['numeroRipartitoriRiscaldamento'];
       raffrescamento= json['raffrescamento'] != null ? StatoRipartitori.fromJson(json['raffrescamento']) : null;
       riscaldamento= json['riscaldamento'] != null ? StatoRipartitori.fromJson(json['riscaldamento']) : null;
