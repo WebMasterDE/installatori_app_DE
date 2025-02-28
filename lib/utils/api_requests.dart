@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class ApiRequests {
-  static const String BASE_URL = 'http://192.168.45.182:8443/api/';
+  static const String BASE_URL = 'http://192.168.2.211:8443/api/';
   static bool _isRefreshing = false;
 
   static Future<dynamic> sendRequest(
@@ -122,19 +124,34 @@ class ApiRequests {
 
       request.fields['appartamento'] = jsonEncode(body);
 
-      print(files.toString);
+      print(files.toString());
 
       for (var entry in files.entries) {
         for (var file in entry.value) {
-          var stream = http.ByteStream(file.openRead());
-          var length = await file.length();
-          var multipartFile = http.MultipartFile(
-            entry.key,
-            stream,
-            length,
-            filename: file.path.split('/').last
-          );
-          request.files.add(multipartFile);
+          final appDir = await getApplicationDocumentsDirectory();
+          final fullPath = '${appDir.path}/${file.path.split('/').last}';
+          final fileToUpload = File(fullPath);
+
+          final tempDir = await getTemporaryDirectory();
+
+          /*var fileComp = await FlutterImageCompress.compressAndGetFile(
+            fullPath,
+            '${tempDir.path}/compressed_${file.path.split('/').last}',
+            quality: 40,
+            format: CompressFormat.png
+          );*/
+
+          if(await fileToUpload.exists()){
+            var stream = http.ByteStream(file!.openRead());
+            var length = await file.length();
+            var multipartFile = http.MultipartFile(
+              entry.key,
+              stream,
+              length,
+              filename: file.path.split('/').last
+            );
+            request.files.add(multipartFile);
+          }
         }
       }
 
@@ -174,10 +191,10 @@ class ApiRequests {
             _isRefreshing = false;
             return {'errore_double_token': true};
           }
-            }
+        }
 
-        if(responseBody['success'] == false){
-          return {'success': false};
+      if(responseBody['error'] == false){
+        return {'success': true};
       }
 
       return {'success': false};

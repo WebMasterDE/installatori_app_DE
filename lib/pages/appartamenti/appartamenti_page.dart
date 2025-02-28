@@ -7,7 +7,6 @@ import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/pages/appartamenti/pagina_modifica.dart';
 import 'package:installatori_de/providers/appartamenti_provider.dart';
-import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -39,10 +38,32 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
     if (widget.arguments.data['nome'] != null) {
       _nomeCondominio = widget.arguments.data['nome'];
     } else {
-      _nomeCondominio = "recuperarlo";
+      getNomeCondominio(_idAnaCondominio);
     }
 
-    appartamenti = AppartamentiProvider().getAppartamenti(_idAnaCondominio);
+    appartamenti = AppartamentiProvider().getAppartamenti(_idAnaCondominio, context);
+  }
+
+  void getNomeCondominio(int idAnaCondominio) async {
+    var sp = await SharedPreferences.getInstance();
+    String? condominiListString = sp.getString('condomini');
+
+    print("testtt $condominiListString");
+
+    if(condominiListString != null){
+      List<CondominioModel> condominiList = List.from(jsonDecode(condominiListString)).map((condominio) {
+          return CondominioModel.fromJson(condominio);
+      }).toList();
+
+      for(var condominio in condominiList){
+        if(condominio.idAnaCondominio == _idAnaCondominio){
+          setState((){
+            _nomeCondominio = condominio.nome;
+          });
+          
+        }
+      }
+    }
   }
 
   @override
@@ -103,8 +124,24 @@ class _AppartamentiPageState extends State<AppartamentiPage> {
                           color: CustomColors.iconColor),
                       title: Text(
                           'Appartamento - interno: ${appartamento.interno}'),
-                      subtitle: Text(
-                          'Piano: ${appartamento.piano} - Scala: ${appartamento.scala}'),
+                      subtitle: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 5,
+                        children: [
+                          Text(
+                            'Piano: ${appartamento.piano} - Scala: ${appartamento.scala}'
+                          ),
+                          !appartamento.savedOnDb ? 
+                              Icon(
+                                HeroiconsOutline.cloud,
+                                size: 15,
+                              ) : 
+                              Icon(
+                                HeroiconsSolid.cloud,
+                                size: 15
+                              )
+                        ],
+                      ),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () async {
                         var sp = await SharedPreferences.getInstance();

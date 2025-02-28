@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:installatori_de/components/stepper.dart';
+import 'package:installatori_de/models/appartamento_model.dart';
 import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/pages/appartamenti/appartamenti_page.dart';
 import 'package:installatori_de/providers/condomini_provider.dart';
 import 'package:installatori_de/providers/save_data_provider.dart';
 import 'package:installatori_de/theme/colors.dart';
+import 'package:installatori_de/utils/api_requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:installatori_de/providers/auth_provider.dart';
@@ -39,6 +41,93 @@ class _CondominiPageState extends State<CondominiPage> {
   Future<bool> logout() {
     final AuthProvider authProvider = AuthProvider();
     return authProvider.logout();
+  }
+
+  Future<bool> saveCondominioInLocal(int idAnaCondominio, String nome) async {
+
+    final sp = await SharedPreferences.getInstance();
+
+    String? listCondominiString = sp.getString('condomini');
+
+    var strumenti = await CondominiProvider().getStrumentiCondomini(idAnaCondominio, context);
+
+    List<CondominioStrumenti> listStrumenti = [];
+
+    for (var strumento in strumenti) {
+      String strumentoName = strumento['nome_servizio'];
+      try {
+        var enumValue = CondominioStrumenti.values.firstWhere(
+          (e) => e.name == strumentoName,
+          orElse: () => throw Exception('Strumento $strumentoName , nel formato errato'),
+        );
+        listStrumenti.add(enumValue);
+      } catch (e) {
+        print('Errore durante la conversione: $strumentoName');
+      }
+    }
+
+    if(listStrumenti.isEmpty){
+      return false;
+    }
+
+    var response = await ApiRequests.sendAuthRequest('condominio/$idAnaCondominio/appartamenti', 'GET', {});
+    
+    if (response['errore_double_token'] == true) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      return false;
+    }
+
+    List<AppartamentoModel> appartamenti = [];
+    if(response != null && response['error'] == false && response['data'] != null && response['data'] != []){
+      appartamenti = List.from(response['data']).map((appartamento){
+        return AppartamentoModel.fromJson(appartamento);
+      }).toList();
+    }
+
+    if(listCondominiString != null){
+      List<CondominioModel> condominiList = List.from(jsonDecode(listCondominiString)).map((condominio) {
+          return CondominioModel.fromJson(condominio);
+      }).toList();
+
+      bool find = false;
+      CondominioModel? cmd;
+      for (var condominio in condominiList) {
+        if(condominio.idAnaCondominio == idAnaCondominio){
+          find = true;
+          cmd = condominio;
+          break;
+        }
+      }
+
+      if(!find){
+        CondominioModel cm = CondominioModel(
+                                idAnaCondominio: idAnaCondominio,
+                                nome: nome,
+                                appartamenti: appartamenti,
+                                strumenti: listStrumenti
+                              );
+        condominiList.add(cm);
+
+        List<Map<String, dynamic>> jsonList = condominiList.map((condominio) => condominio.toJson()).toList();
+        return await sp.setString('condomini', jsonEncode(jsonList));
+      }
+    }else{
+
+      CondominioModel cm = CondominioModel(
+                              idAnaCondominio: idAnaCondominio, 
+                              nome: nome,
+                              appartamenti: appartamenti,
+                              strumenti: listStrumenti
+                            );
+      List<CondominioModel> newCondominiList = [];
+      newCondominiList.add(cm);
+
+      List<Map<String, dynamic>> jsonList = newCondominiList.map((condominio) => condominio.toJson()).toList();
+      return await sp.setString('condomini', jsonEncode(jsonList));
+
+    }
+
+    return true;
   }
 
   @override
@@ -150,13 +239,26 @@ class _CondominiPageState extends State<CondominiPage> {
                                 subtitle: Text(
                                     "${condominio['indirizzo']} ${condominio['citta']} ${condominio['cap']}"),
                                 trailing: Icon(Icons.arrow_forward_ios),
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/appartamenti',
-                                      arguments: AppartamentiPageArgs(data: {
-                                        'id': condominio['id_ana_condominio'],
-                                        'nome': condominio['nome']
-                                      })
-                                  );
+                                onTap: () async {
+
+                                  bool result = await saveCondominioInLocal(condominio['id_ana_condominio'], condominio['nome']);
+
+                                  var sh = await SharedPreferences.getInstance();
+                                  String? condominiListString = await sh.getString('condomini');
+                                  print(condominiListString);
+
+                                  //SaveDataProvider().saveToDb();
+
+                                  if(result){
+                                    Navigator.pushNamed(context, '/appartamenti',
+                                        arguments: AppartamentiPageArgs(data: {
+                                          'id': condominio['id_ana_condominio'],
+                                          'nome': condominio['nome']
+                                        })
+                                    );
+                                  }
+
+                                  
 
                                   //saveDataDev();
 

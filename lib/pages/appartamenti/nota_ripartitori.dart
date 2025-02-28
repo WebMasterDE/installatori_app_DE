@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/appartamenti/recap_ripartitori.dart';
@@ -24,7 +25,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
   int _idAnaCondominio = 0;
   int _idAppartamento = 0;
   AppartamentoModel? _appartamento;
-  String _selectedStrumento = "";
+  late CondominioStrumenti _selectedStrumento;
   String _matricolaRipartitore = "";
   bool _modifica = false;
 
@@ -59,20 +60,20 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
   void initializeModifica() async {
     RipartitoriModel ripartitore;
     switch (_selectedStrumento) {
-      case "Contatore Freddo" ||
-            "Contatore Caldo/Freddo" ||
-            "Contatore Caldo" ||
-            "Ripartitori Riscaldamento":
+      case CondominioStrumenti.contatoreFreddo ||
+            CondominioStrumenti.contatoreCaldoFreddo ||
+            CondominioStrumenti.contatoreCaldo ||
+            CondominioStrumenti.ripartitoriRiscaldamento:
         ripartitore = _appartamento!.raffrescamento!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
         _notaRipartitore.text = ripartitore.note!;
         break;
-      case "Contatore Acqua Calda":
+      case CondominioStrumenti.contatoreAcquaCalda:
         ripartitore = _appartamento!.acquaCalda!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
         _notaRipartitore.text = ripartitore.note!;
         break;
-      case "Contatore Acqua Fredda":
+      case CondominioStrumenti.contatoreAcquaFredda:
         ripartitore = _appartamento!.acquaFredda!.ripartitori!
             .firstWhere((rip) => rip.matricola == _matricolaRipartitore);
         _notaRipartitore.text = ripartitore.note!;
@@ -176,7 +177,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
   void _stepSucc() async {
     if (_notaRipartitore.text.isNotEmpty) {
       switch (_selectedStrumento) {
-        case "Contatore Freddo":
+        case CondominioStrumenti.contatoreFreddo:
           for (final ripartitore
               in _appartamento!.raffrescamento!.ripartitori!) {
             if (ripartitore.matricola == _matricolaRipartitore) {
@@ -184,7 +185,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
             }
           }
           break;
-        case "Contatore Caldo/Freddo":
+        case CondominioStrumenti.contatoreCaldoFreddo:
           for (final ripartitore
               in _appartamento!.riscaldamento!.ripartitori!) {
             if (ripartitore.matricola == _matricolaRipartitore) {
@@ -199,7 +200,7 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
             }
           }
           break;
-        case "riscaldamento" || "Contatore Caldo":
+        case CondominioStrumenti.ripartitoriRiscaldamento || CondominioStrumenti.contatoreCaldo:
           for (final ripartitore
               in _appartamento!.riscaldamento!.ripartitori!) {
             if (ripartitore.matricola == _matricolaRipartitore) {
@@ -207,14 +208,14 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
             }
           }
           break;
-        case "Contatore Acqua Calda":
+        case CondominioStrumenti.contatoreAcquaCalda:
           for (final ripartitore in _appartamento!.acquaCalda!.ripartitori!) {
             if (ripartitore.matricola == _matricolaRipartitore) {
               ripartitore.note = _notaRipartitore.text;
             }
           }
           break;
-        case "Contatore Acqua Fredda":
+        case CondominioStrumenti.contatoreAcquaFredda:
           for (final ripartitore in _appartamento!.acquaFredda!.ripartitori!) {
             if (ripartitore.matricola == _matricolaRipartitore) {
               ripartitore.note = _notaRipartitore.text;
@@ -241,11 +242,11 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
     // final sp = await SharedPreferences.getInstance();
     // sp.setInt('id_appartamento_from', _idAppartamento);
     // switch (_selectedStrumento) {
-    //   case "Contatore Freddo":
+    //   case "contatoreFreddo":
     //     _appartamento!.raffrescamento!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
     //     break;
-    //   case "Contatore Caldo/Freddo":
+    //   case "contatoreCaldoFreddo":
     //     _appartamento!.raffrescamento!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
@@ -253,21 +254,21 @@ class _NotaRipartitoriPageState extends State<NotaRipartitoriPage> {
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
     //     break;
-    //   case "Contatore Caldo":
+    //   case "contatoreCaldo":
     //     _appartamento!.riscaldamento!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
     //     break;
-    //   case "Ripartitori Riscaldamento":
+    //   case "ripartitoriRiscaldamento":
     //     _appartamento!.riscaldamento!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
     //     break;
-    //   case "Contatore Acqua Calda":
+    //   case "contatoreAcquaCalda":
     //     _appartamento!.acquaCalda!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 
     //     break;
-    //   case "Contatore Acqua Fredda":
+    //   case "contatoreAcquaFredda":
     //     _appartamento!.acquaFredda!.ripartitori!.removeWhere(
     //         (ripartitore) => ripartitore.matricola == _matricolaRipartitore);
 

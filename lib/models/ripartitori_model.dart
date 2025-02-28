@@ -30,13 +30,13 @@ class RipartitoriModel {
    RipartitoriModel.fromJson(Map<String, dynamic> json)
        : matricola = json['matricola'],
          descrizione = json['descrizione'],
-         vano = json['vano'],
+         vano = json['vano'] != null ? int.parse(json['vano'].toString()) : null,
          pathImage = json['pathImage'],
          tipologia = json['tipologia'],
-         altezza = json['altezza'],
-         larghezza = json['larghezza'],
-         profondita = json['profondita'],
-         numeroElementi = json['numeroElementi'],
+         altezza = json['altezza'] != null ? double.parse(json['altezza'].toString()) : null,
+         larghezza = json['larghezza'] != null ? double.parse(json['larghezza'].toString()) : null,
+         profondita = json['profondita'] != null ? double.parse(json['profondita'].toString()) : null,
+         numeroElementi = json['numeroElementi'] != null ? int.parse(json['numeroElementi'].toString()) : null,
          note = json['note'],
          produttore = json['produttore'],
          cambioMatricola = json['cambioMatricola'];

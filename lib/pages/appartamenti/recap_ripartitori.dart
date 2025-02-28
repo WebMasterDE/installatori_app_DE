@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:installatori_de/components/custom_button.dart';
 import 'package:installatori_de/models/appartamento_model.dart';
+import 'package:installatori_de/models/condominio_model.dart';
 import 'package:installatori_de/models/ripartitori_model.dart';
 import 'package:installatori_de/pages/appartamenti/new_strumento_page.dart';
 import 'package:installatori_de/pages/appartamenti/nota_appartameto.dart';
@@ -28,7 +29,7 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
   int _idAppartamento = 0;
   late Future<List<RipartitoriModel>> _ripartitori;
   AppartamentoModel? _appartamento;
-  String _selectedStrumento = "";
+  late CondominioStrumenti _selectedStrumento;
   bool _richiestaModifica = false;
 
   @override
@@ -51,15 +52,15 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
 
     if (ap != null) {
       _appartamento = AppartamentoModel.fromJson(jsonDecode(ap));
-      if (_selectedStrumento == "Ripartitori Riscaldamento" ||
-          _selectedStrumento == "Contatore Caldo/Freddo" ||
-          _selectedStrumento == "Contatore Caldo") {
+      if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento ||
+          _selectedStrumento == CondominioStrumenti.contatoreCaldoFreddo ||
+          _selectedStrumento == CondominioStrumenti.contatoreCaldo) {
         return _appartamento!.riscaldamento!.ripartitori!;
-      }else if (_selectedStrumento == "Contatore Freddo") {
+      }else if (_selectedStrumento == CondominioStrumenti.contatoreFreddo) {
         return _appartamento!.raffrescamento!.ripartitori!;
-      } else if (_selectedStrumento == "Contatore Acqua Calda") {
+      } else if (_selectedStrumento == CondominioStrumenti.contatoreAcquaCalda) {
         return _appartamento!.acquaCalda!.ripartitori!;
-      } else if (_selectedStrumento == "Contatore Acqua Fredda") {
+      } else if (_selectedStrumento == CondominioStrumenti.contatoreAcquaFredda) {
         return _appartamento!.acquaFredda!.ripartitori!;
       }
     }
@@ -222,7 +223,7 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
       }
     }
 
-    if (_selectedStrumento == "Ripartitori Riscaldamento") {
+    if (_selectedStrumento == CondominioStrumenti.ripartitoriRiscaldamento) {
       if (_appartamento!.riscaldamento!.ripartitori!.length <
           _appartamento!.numeroRipartitoriRiscaldamento!) {
         Navigator.pushNamed(context, "/newStrumento",
@@ -244,11 +245,11 @@ class _RecapRipartitoriState extends State<RecapRipartitori> {
               'selectedStrumento': _selectedStrumento,
             }));
       }
-    } else if (_selectedStrumento == "Contatore Freddo" ||
-        _selectedStrumento == "Contatore Caldo/Freddo" ||
-        _selectedStrumento == "Contatore Caldo" ||
-        _selectedStrumento == "Contatore Acqua Calda" ||
-        _selectedStrumento == "Contatore Acqua Fredda") {
+    } else if (_selectedStrumento == CondominioStrumenti.contatoreFreddo ||
+        _selectedStrumento == CondominioStrumenti.contatoreCaldoFreddo ||
+        _selectedStrumento == CondominioStrumenti.contatoreCaldo ||
+        _selectedStrumento == CondominioStrumenti.contatoreAcquaCalda ||
+        _selectedStrumento == CondominioStrumenti.contatoreAcquaFredda) {
       Navigator.pushNamed(context, "/nota_appartamento",
           arguments: NotaAppartamentoPageArgs(data: {
             'id': _idAnaCondominio,
